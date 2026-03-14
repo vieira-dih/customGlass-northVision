@@ -1,0 +1,79 @@
+/* ================================ */
+/* HERO */
+/* ================================ */
+.hero{
+  text-align:center;                           /* centraliza todo o conteúdo da seção */
+  padding:70px 20px 40px 20px;                 /* espaçamento interno: topo, direita, baixo, esquerda */
+  background:#f4f4f4;                          /* cor de fundo cinza claro */
+}
+/* TÍTULO */
+.hero h1{
+  font-size:60px;                              /* tamanho grande para destaque do título */
+  margin-bottom:25px;                          /* espaço entre título e texto */
+}
+/* TEXTO */
+.hero p{
+  font-size:22px;                              /* tamanho do texto descritivo */
+  max-width:600px;                             /* limita largura para melhor leitura */
+  margin:0 auto;                               /* centraliza o parágrafo horizontalmente */
+  line-height:1.6;                             /* aumenta espaçamento entre linhas */
+  color:#555;                                  /* cinza escuro para leitura confortável */
+}
+/* CATÁLOGO */
+.catalogo{
+  padding:70px 40px;                           /* espaçamento interno da seção catálogo */
+  text-align:center;                           /* centraliza conteúdo da seção */
+}
+
+.catalogo h2{
+  font-size:38px;                              /* tamanho do título da seção */
+  margin-bottom:50px;                          /* espaço entre título e grid de produtos */
+}
+/* GRID PRODUTOS */
+.produtos{
+  display:grid;                                /* ativa sistema de grid */
+  grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); /* cria colunas responsivas */
+  gap:40px;                                    /* espaço entre os cards */
+  max-width:1100px;                            /* largura máxima da grade */
+  margin:0 auto;                               /* centraliza o grid na página */
+}
+/* CARD PRODUTO */
+.produto{
+  background:white;                            /* fundo branco do card */
+  padding:30px;                                /* espaço interno do card */
+  border-radius:12px;                          /* bordas arredondadas */
+  box-shadow:0 10px 25px rgba(0,0,0,0.08);     /* sombra leve para profundidade */
+  transition:all 0.3s ease;                    /* animação suave ao interagir */
+}
+
+.produto:hover{
+  transform:translateY(-8px);                  /* levanta o card ao passar o mouse */
+  box-shadow:0 18px 40px rgba(0,0,0,0.15);     /* aumenta a sombra para efeito de destaque */
+}
+/* IMAGEM */
+.produto img{
+  width:100%;                                  /* ocupa toda largura disponível do card */
+  max-width:220px;                             /* limita tamanho máximo da imagem */
+  margin-bottom:20px;                          /* espaço abaixo da imagem */
+}
+/* NOME */
+.produto h3{
+  font-size:22px;                              /* tamanho do nome do produto */
+  margin-bottom:15px;                          /* espaço entre nome e botão */
+}
+/* BOTÃO */
+.produto button{
+  padding:12px 28px;                           /* espaçamento interno do botão */
+  font-size:16px;                              /* tamanho da fonte do botão */
+  border:none;                                 /* remove borda padrão */
+  background:#111;                             /* cor preta do botão */
+  color:white;                                 /* texto branco */
+  border-radius:6px;                           /* bordas arredondadas */
+  cursor:pointer;                              /* muda cursor para mãozinha */
+}
+
+.produto button:hover{
+
+  background:#333;                             /* botão fica cinza escuro ao passar mouse */
+
+}

@@ -1,0 +1,64 @@
+.custom-container{
+  display: flex;                         /* ativa layout flexível (flexbox) */
+  justify-content: center;               /* centraliza os elementos horizontalmente */
+  align-items: center;                   /* centraliza os elementos verticalmente */
+  gap: 80px;                             /* espaço entre lado esquerdo e direito */
+
+  max-width: 1200px;                     /* largura máxima da área de customização */
+  margin: 80px auto;                     /* espaço acima/abaixo e centralização horizontal */
+  padding: 20px;                         /* espaçamento interno da seção */
+}
+
+/* lado esquerdo (imagem) */
+
+.custom-left{
+  flex: 1;                               /* ocupa metade do espaço disponível */
+  display: flex;                         /* ativa flexbox */
+  justify-content: center;               /* centraliza a imagem horizontalmente */
+}
+
+.custom-glasses{
+  max-width: 500px;                      /* limita tamanho máximo do óculos */
+  width: 100%;                           /* permite que a imagem se adapte ao container */
+}
+
+/* lado direito (configuração) */
+
+.custom-right{
+  flex: 1;                               /* ocupa metade do espaço disponível */
+}
+
+.custom-right h1{
+  font-size: 32px;                       /* tamanho do título do produto */
+  margin-bottom: 20px;                   /* espaço entre título e opções */
+}
+
+.lens-options{
+  display: flex;                         /* coloca os botões lado a lado */
+  gap: 15px;                             /* espaço entre os botões */
+  margin-top: 20px;                      /* espaço acima das opções */
+}
+
+.lens-options button{
+  padding: 10px 18px;                    /* espaço interno do botão */
+  border: none;                          /* remove borda padrão */                    /* fundo preto */
+  color: white;                          /* texto branco */
+  cursor: pointer;                       /* cursor vira mãozinha */
+  border-radius: 6px;                    /* cantos arredondados */
+  transition: 0.3s;                      /* animação suave no hover */
+}
+.preta{
+  background:black;                      /* fundo preto para botão preta */
+}
+
+.azul{
+  background:blue;                       /* fundo azul para botão azul */
+}
+
+.dourada{
+  background:gold;                       /* fundo dourado para botão dourada */
+}
+
+.lens-options button:hover{
+  background: #444;                      /* muda cor ao passar o mouse */
+}

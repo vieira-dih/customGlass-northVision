@@ -1,0 +1,21 @@
+/* ================================= */
+/* RESET PADRÃO DO NAVEGADOR */
+/* ================================= */
+
+*{
+  margin:0;                                                           /* remove margens padrão */
+  padding:0;                                                          /* remove espaçamento interno padrão */
+  box-sizing:border-box;                                              /* faz largura considerar padding e borda */
+}
+
+
+
+/* ================================= */
+/* CONFIGURAÇÕES GERAIS DO SITE */
+/* ================================= */
+
+body{
+  font-family: Arial, Helvetica, sans-serif;                           /* define a fonte principal do site */
+  background:#f5f5f5;                                                /* cor de fundo do site */
+  color:#333;                                                        /* cor padrão dos textos */
+}

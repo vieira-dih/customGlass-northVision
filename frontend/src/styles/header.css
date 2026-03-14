@@ -1,0 +1,48 @@
+/* ================================ */
+/* HEADER */
+/* ================================ */
+
+.header{
+
+  display:flex;                               /* ativa flexbox */
+  justify-content:space-between;               /* separa logo e menu */
+  align-items:center;                          /* centraliza verticalmente */
+
+  padding:18px 55px;                           /* espaçamento interno */
+
+  background:#111;                             /* fundo preto */
+  color:white;
+
+}
+
+/* LOGO */
+
+.logo{
+
+  height:60px;                                 /* altura da logo */
+
+}
+
+/* MENU */
+
+.header nav a{
+
+  color:white;                                 /* cor do link */
+
+  text-decoration:none;                        /* remove sublinhado */
+
+  margin-left:22px;                            /* espaço entre links */
+
+  font-weight:500;                             /* leve destaque */
+
+  transition:0.2s;                             /* animação hover */
+
+}
+
+/* HOVER */
+
+.header nav a:hover{
+
+  opacity:0.7;                                 /* efeito de transparência */
+
+}
