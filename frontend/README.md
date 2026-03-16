@@ -27,7 +27,7 @@ O usuário pode escolher um modelo e personalizar as cores das lentes diretament
 ---
 
 ## 📂 Estrutura do projeto
-
+```
 src
 │
 ├── assets
@@ -48,7 +48,7 @@ src
 ├── styles
 │ └── global.css 
 
-
+```
 ---
 
 ## ▶️ Como rodar o projeto
