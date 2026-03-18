@@ -7,17 +7,10 @@
   background:#f4f4f4;                          /* cor de fundo cinza claro */
 }
 /* TÍTULO */
-.hero h1{
-  font-size:60px;                              /* tamanho grande para destaque do título */
+.hero img{
+  max-width:100%;                              /* ocupa toda largura disponível */
+  height:auto;                                 /* mantém proporção da imagem */
   margin-bottom:25px;                          /* espaço entre título e texto */
-}
-/* TEXTO */
-.hero p{
-  font-size:22px;                              /* tamanho do texto descritivo */
-  max-width:600px;                             /* limita largura para melhor leitura */
-  margin:0 auto;                               /* centraliza o parágrafo horizontalmente */
-  line-height:1.6;                             /* aumenta espaçamento entre linhas */
-  color:#555;                                  /* cinza escuro para leitura confortável */
 }
 /* CATÁLOGO */
 .catalogo{

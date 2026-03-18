@@ -3,18 +3,14 @@ import Header from "../../components/Header"                   // importa compon
 import Footer from "../../components/Footer"                   // importa componente Footer
 import products from "../../data/products"                     // importa lista de produtos
 import ProductCard from "../../components/ProductCard"         // importa componente de card
-
+import banner from "../../assets/banner-north.png"                      // importa imagem de banner
 function Home() {                                              // componente da página inicial
 
   return (
     <div>
       <Header />                                               {/* renderiza o header do site */}
       <section className="hero">                               {/* seção principal */}
-        <h1>Personalize seu óculos</h1>                        {/* título principal */}
-        <p>                                                    {/* descrição */}
-          Escolha um modelo e monte seu óculos esportivo
-          com cores de lente e armação exclusivas.
-        </p>
+        <img src={banner} alt="Banner principal" />
       </section>
       <section className="catalogo" id="modelos">              {/* seção de catálogo */}
         <h2>Modelos disponíveis</h2>                            {/* título da seção */}
