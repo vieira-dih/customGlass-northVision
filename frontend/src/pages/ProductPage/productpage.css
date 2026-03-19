@@ -1,64 +1,151 @@
 .custom-container{
   display: flex;                         /* ativa layout flexível (flexbox) */
-  justify-content: center;               /* centraliza os elementos horizontalmente */
-  align-items: center;                   /* centraliza os elementos verticalmente */
-  gap: 80px;                             /* espaço entre lado esquerdo e direito */
+  justify-content: center;               /* centraliza horizontalmente */
+  align-items: center;                   /* centraliza verticalmente */
+  gap: 80px;                             /* espaço entre preview e configuração */
 
-  max-width: 1200px;                     /* largura máxima da área de customização */
-  margin: 80px auto;                     /* espaço acima/abaixo e centralização horizontal */
-  padding: 20px;                         /* espaçamento interno da seção */
+  max-width: 1200px;                     /* largura máxima da área */
+  margin: 80px auto;                     /* centraliza e adiciona espaçamento vertical */
+  padding: 20px;                         /* espaçamento interno */
 }
 
 /* lado esquerdo (imagem) */
 
 .custom-left{
-  flex: 1;                               /* ocupa metade do espaço disponível */
+  flex: 1;                               /* ocupa metade do espaço */
   display: flex;                         /* ativa flexbox */
-  justify-content: center;               /* centraliza a imagem horizontalmente */
+  flex-direction: column;                /* organiza em coluna */
+  align-items: center;                   /* centraliza conteúdo */
 }
 
 .custom-glasses{
-  max-width: 500px;                      /* limita tamanho máximo do óculos */
-  width: 100%;                           /* permite que a imagem se adapte ao container */
+  max-width: 500px;                      /* limita tamanho máximo */
+  width: 100%;                           /* responsivo */
 }
 
 /* lado direito (configuração) */
 
 .custom-right{
-  flex: 1;                               /* ocupa metade do espaço disponível */
+  flex: 1;                               /* ocupa metade do espaço */
 }
 
 .custom-right h1{
-  font-size: 32px;                       /* tamanho do título do produto */
-  margin-bottom: 20px;                   /* espaço entre título e opções */
+  font-size: 32px;                       /* tamanho do título */
+  margin-bottom: 20px;                   /* espaço abaixo */
 }
 
+.custom-right h2{
+  margin-top: 20px;                      /* espaço acima */
+  margin-bottom: 10px;                   /* espaço abaixo */
+  font-size: 20px;                       /* tamanho do subtítulo */
+}
+
+/* 🔥 TIPO DE ARMAÇÃO */
+
+.tipo-armacao{
+  display: flex;                         /* botões lado a lado */
+  gap: 10px;                             /* espaço entre botões */
+  margin-bottom: 20px;                   /* espaço abaixo */
+}
+
+.tipo-armacao button{
+  padding: 10px 20px;                    /* espaço interno */
+  border: 2px solid #ccc;                          /* remove borda padrão */
+  background: #111;                      /* fundo escuro */
+  color: white;                          /* texto branco */
+  cursor: pointer;                       /* cursor de clique */
+  border-radius: 6px;                    /* cantos arredondados */
+  transition: 0.3s;                      /* animação suave */
+}
+
+.tipo-armacao button:hover{
+  background: #444;                      /* cor ao passar mouse */
+}
+
+/* 🎨 CORES DA ARMAÇÃO */
+
+.cores{
+  display: flex;                         /* layout horizontal */
+  flex-wrap: wrap;                       /* quebra linha se necessário */
+  gap: 10px;                             /* espaço entre botões */
+  margin-bottom: 20px;                   /* espaço abaixo */
+}
+
+.cores button{
+  padding: 10px 15px;                    /* espaço interno */
+  border: 2px solid #ccc;                           /* remove borda */
+  cursor: pointer;                       /* cursor de clique */
+  border-radius: 6px;                    /* cantos arredondados */
+  transition: 0.3s;                      /* animação */
+  color: white;                          /* texto branco */
+}
+
+/* cores específicas */
+
+.cores button:nth-child(1){ background: black; }       /* cor preta */
+.cores button:nth-child(2){ background: white; color: black; } /* cor branca */
+.cores button:nth-child(3){ background: blue; }        /* cor azul */
+.cores button:nth-child(4){ background: red; }         /* cor vermelha */
+.cores button:nth-child(5){ background: green; }       /* cor verde */
+.cores button:nth-child(6){ background: gray; }        /* cor cinza/transparente */
+
+/* 👓 LENTES */
+
 .lens-options{
-  display: flex;                         /* coloca os botões lado a lado */
-  gap: 15px;                             /* espaço entre os botões */
-  margin-top: 20px;                      /* espaço acima das opções */
+  display: flex;                         /* botões lado a lado */
+  flex-wrap: wrap;                       /* quebra linha */
+  gap: 15px;                             /* espaço entre botões */
+  margin-top: 20px;                      /* espaço acima */
 }
 
 .lens-options button{
-  padding: 10px 18px;                    /* espaço interno do botão */
-  border: none;                          /* remove borda padrão */                    /* fundo preto */
+  padding: 10px 18px;                    /* espaço interno */
+  border: none;                          /* remove borda */
   color: white;                          /* texto branco */
-  cursor: pointer;                       /* cursor vira mãozinha */
+  cursor: pointer;                       /* cursor de clique */
   border-radius: 6px;                    /* cantos arredondados */
-  transition: 0.3s;                      /* animação suave no hover */
+  transition: 0.3s;                      /* animação */
 }
+
+/* cores das lentes */
+
 .preta{
-  background:black;                      /* fundo preto para botão preta */
+  background: black;                     /* lente preta */
 }
 
 .azul{
-  background:blue;                       /* fundo azul para botão azul */
+  background: blue;                      /* lente azul */
 }
 
 .dourada{
-  background:gold;                       /* fundo dourado para botão dourada */
+  background: gold;                      /* lente dourada */
+  color: black;                          /* melhora contraste */
 }
 
-.lens-options button:hover{
-  background: #444;                      /* muda cor ao passar o mouse */
+/* hover geral */
+
+.lens-options button:hover,
+.cores button:hover,
+.tipo-armacao button:hover{
+  opacity: 0.8;                          /* efeito ao passar mouse */
+}
+
+/* 🔥 botão ativo */
+
+.ativo{
+  border: 3px solid #00ff88;             /* borda destacada */
+  transform: scale(1.05);                /* leve aumento */
+}
+
+/* 📱 RESPONSIVO */
+
+@media (max-width: 900px){
+  .custom-container{
+    flex-direction: column;              /* empilha os elementos */
+    gap: 40px;                           /* reduz espaço */
+  }
+
+  .custom-glasses{
+    max-width: 300px;                    /* diminui imagem */
+  }
 }

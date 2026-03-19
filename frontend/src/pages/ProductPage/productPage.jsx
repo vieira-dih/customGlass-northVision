@@ -1,79 +1,137 @@
-import { useParams } from "react-router-dom"           // hook para pegar parâmetros da URL
-import { useState } from "react"                       // hook para criar estado no componente
+import { useParams } from "react-router-dom"
+import { useState } from "react"
 
-import Header from "../../components/Header"           // importa componente Header
-import Footer from "../../components/Footer"           // importa componente Footer
+import Header from "../../components/Header"
+import Footer from "../../components/Footer"
 
-import products from "../../data/products"             // importa lista de produtos
+import products from "../../data/products"
 
-import lensPreta from "../../assets/glasses/radar-ev/lens-preta.png"     // importa imagem da lente preta
-import lensAzul from "../../assets/glasses/radar-ev/lens-azul.png"       // importa imagem da lente azul
-import lensDourada from "../../assets/glasses/radar-ev/lens-dourada.png" // importa imagem da lente dourada
+import lensPreta from "../../assets/glasses/radar-ev/lens-preta.png"
+import lensAzul from "../../assets/glasses/radar-ev/lens-azul.png"
+import lensDourada from "../../assets/glasses/radar-ev/lens-dourada.png"
 
-import "./productPage.css"                             // importa css da página
+import "./productPage.css"
 
-function ProductPage() {                               // componente da página de customização
+function ProductPage() {
 
-  const { slug } = useParams()                         // pega o slug da URL (ex: /product/radar-ev)
+  const { slug } = useParams()
+  const produto = products.find(p => p.slug === slug)
 
-  const produto = products.find(p => p.slug === slug)  // procura o produto correspondente no array
+  // 🔥 NOVOS ESTADOS
+  const [tipoArmacao, setTipoArmacao] = useState("curvo")
+  const [corArmacao, setCorArmacao] = useState(null)
+  const [lente, setLente] = useState(lensPreta)
 
-  const [lente, setLente] = useState(lensPreta)        // cria estado da lente e define preta como padrão
+  // 🔥 CONFIGURAÇÃO POR TIPO
+  const config = {
+    curvo: {
+      cores: ["preto", "branco", "azul", "vermelho", "verde", "transparente"],
+      lentes: [
+        { nome: "Preta", img: lensPreta },
+        { nome: "Azul", img: lensAzul },
+        { nome: "Dourada", img: lensDourada },
+      ]
+    },
+    reto: {
+      cores: ["preto", "cinza", "marrom", "verde"],
+      lentes: [
+        { nome: "Preta", img: lensPreta },
+        { nome: "Azul", img: lensAzul },
+      ]
+    }
+  }
 
-  if (!produto) return <h1>Produto não encontrado</h1> // caso o slug não exista no array
+  const opcoes = config[tipoArmacao]
+
+  if (!produto) return <h1>Produto não encontrado</h1>
 
   return (
     <>
-      <Header />                                       {/* renderiza header do site */}
+      <Header />
 
-      <div className="custom-container">               {/* container principal da página */}
+      <div className="custom-container">
 
-        <div className="custom-left">                  {/* lado esquerdo (preview do óculos) */}
-
+        {/* 🔎 PREVIEW */}
+        <div className="custom-left">
           <img
-            className="custom-glasses"                 // classe para estilização da imagem
-            src={lente}                                // imagem muda conforme lente selecionada
-            alt="Óculos customizado"                   // texto alternativo da imagem
+            className="custom-glasses"
+            src={lente}
+            alt="Óculos customizado"
           />
 
+          <p>Tipo: {tipoArmacao}</p>
+          <p>Armação: {corArmacao || "Selecione"}</p>
         </div>
 
-        <div className="custom-right">                 {/* lado direito (configuração) */}
+        {/* ⚙️ CONFIGURAÇÃO */}
+        <div className="custom-right">
 
-          <h1>{produto.nome}</h1>                      {/* mostra nome do produto */}
+          <h1>{produto.nome}</h1>
 
-          <p>Escolha a cor da lente</p>                {/* instrução para o usuário */}
+          {/* 🕶️ TIPO */}
+          <h2>Tipo de armação</h2>
 
-          <div className="lens-options">               {/* container dos botões de lentes */}
-
-            <button 
-            className="lens-btn preta"
-            onClick={() => setLente(lensPreta)}>  {/* altera lente para preta */}
-              Preta
+          <div className="tipo-armacao">
+            <button
+              className={tipoArmacao === "curvo" ? "ativo" : ""}
+              onClick={() => {
+                setTipoArmacao("curvo")
+                setCorArmacao(null)
+                setLente(null)
+              }}
+            >
+              Curvo
             </button>
 
             <button
-            className="lens-btn azul"
-            onClick={() => setLente(lensAzul)}>   {/* altera lente para azul */}
-              Azul
+              className={tipoArmacao === "reto" ? "ativo" : ""}
+              onClick={() => {
+                setTipoArmacao("reto")
+                setCorArmacao(null)
+                setLente(null)
+              }}
+            >
+              Reto
             </button>
+          </div>
 
-            <button 
-            className="lens-btn dourada"
-            onClick={() => setLente(lensDourada)}> {/* altera lente para dourada */}
-              Dourada
-            </button>
+          {/* 🎨 COR */}
+          <h2>Cor da armação</h2>
 
+          <div className="cores">
+            {opcoes.cores.map(cor => (
+              <button
+                key={cor}
+                className={corArmacao === cor ? "ativo" : ""}
+                onClick={() => setCorArmacao(cor)}
+              >
+                {cor}
+              </button>
+            ))}
+          </div>
+
+          {/* 👓 LENTES */}
+          <h2>Lentes disponíveis</h2>
+
+          <div className="lens-options">
+            {opcoes.lentes.map((l, index) => (
+              <button
+                key={index}
+                className={`lens-btn ${l.nome.toLowerCase()}`}
+                onClick={() => setLente(l.img)}
+              >
+                {l.nome}
+              </button>
+            ))}
           </div>
 
         </div>
 
       </div>
 
-      <Footer />                                      {/* renderiza rodapé */}
-
+      <Footer />
     </>
   )
 }
 
-export default ProductPage                             // exporta componente da página
+export default ProductPage
