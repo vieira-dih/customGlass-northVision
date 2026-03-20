@@ -17,15 +17,13 @@ function ProductPage() {
   const { slug } = useParams()
   const produto = products.find(p => p.slug === slug)
 
-  // 🔥 NOVOS ESTADOS
   const [tipoArmacao, setTipoArmacao] = useState("curvo")
   const [corArmacao, setCorArmacao] = useState(null)
-  const [lente, setLente] = useState(lensPreta)
+  const [lentesSelecionadas, setLentesSelecionadas] = useState([])
 
-  // 🔥 CONFIGURAÇÃO POR TIPO
   const config = {
     curvo: {
-      cores: ["preto", "branco", "azul", "vermelho", "verde", "transparente"],
+      cores: ["preto", "branco","laranja", "cinza", "bege",  "transparente brilhante", "transparente fosco"],
       lentes: [
         { nome: "Preta", img: lensPreta },
         { nome: "Azul", img: lensAzul },
@@ -43,6 +41,22 @@ function ProductPage() {
 
   const opcoes = config[tipoArmacao]
 
+  const toggleLente = (lente) => {
+    const existe = lentesSelecionadas.find(l => l.nome === lente.nome)
+
+    if (existe) {
+      setLentesSelecionadas(lentesSelecionadas.filter(l => l.nome !== lente.nome))
+    } else {
+      if (lentesSelecionadas.length < 5) {
+        setLentesSelecionadas([...lentesSelecionadas, lente])
+      } else {
+        alert("Máximo de 5 lentes")
+      }
+    }
+  }
+
+  const preview = lentesSelecionadas[0]?.img || lensPreta
+
   if (!produto) return <h1>Produto não encontrado</h1>
 
   return (
@@ -53,80 +67,99 @@ function ProductPage() {
 
         {/* 🔎 PREVIEW */}
         <div className="custom-left">
-          <img
-            className="custom-glasses"
-            src={lente}
-            alt="Óculos customizado"
-          />
-
-          <p>Tipo: {tipoArmacao}</p>
-          <p>Armação: {corArmacao || "Selecione"}</p>
+          <img className="custom-glasses" src={preview} alt="Óculos" />
         </div>
 
-        {/* ⚙️ CONFIGURAÇÃO */}
+        {/* ⚙️ CONFIG */}
         <div className="custom-right">
 
           <h1>{produto.nome}</h1>
 
           {/* 🕶️ TIPO */}
-          <h2>Tipo de armação</h2>
+          <div className="section">
+            <h2>Tipo de armação</h2>
+            <div className="tipo-armacao">
+              <button
+                className={tipoArmacao === "curvo" ? "ativo" : ""}
+                onClick={() => {
+                  setTipoArmacao("curvo")
+                  setCorArmacao(null)
+                  setLentesSelecionadas([])
+                }}
+              >
+                Curvo
+              </button>
 
-          <div className="tipo-armacao">
-            <button
-              className={tipoArmacao === "curvo" ? "ativo" : ""}
-              onClick={() => {
-                setTipoArmacao("curvo")
-                setCorArmacao(null)
-                setLente(null)
-              }}
-            >
-              Curvo
-            </button>
-
-            <button
-              className={tipoArmacao === "reto" ? "ativo" : ""}
-              onClick={() => {
-                setTipoArmacao("reto")
-                setCorArmacao(null)
-                setLente(null)
-              }}
-            >
-              Reto
-            </button>
+              <button
+                className={tipoArmacao === "reto" ? "ativo" : ""}
+                onClick={() => {
+                  setTipoArmacao("reto")
+                  setCorArmacao(null)
+                  setLentesSelecionadas([])
+                }}
+              >
+                Reto
+              </button>
+            </div>
           </div>
 
-          {/* 🎨 COR */}
-          <h2>Cor da armação</h2>
+          {/* 🎨 CORES */}
+          <div className="section">
+            <h2>Cor da armação</h2>
 
-          <div className="cores">
-            {opcoes.cores.map(cor => (
-              <button
-                key={cor}
-                className={corArmacao === cor ? "ativo" : ""}
-                onClick={() => setCorArmacao(cor)}
-              >
-                {cor}
-              </button>
-            ))}
+            <div className="cores">
+              {opcoes.cores.map(cor => (
+                <button
+                  key={cor}
+
+                  className={`
+                    ${cor.toLowerCase().replace(/\s+/g, "-")}
+                    ${corArmacao === cor ? "ativo" : ""}
+                  `}
+
+                  onClick={() => setCorArmacao(cor)}
+                >
+                  <span className="tooltip">{cor}</span> {/* 🔥 nome da cor */}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* 👓 LENTES */}
-          <h2>Lentes disponíveis</h2>
+          <div className="section">
+            <h2>Escolha até 5 lentes</h2>
 
-          <div className="lens-options">
-            {opcoes.lentes.map((l, index) => (
-              <button
-                key={index}
-                className={`lens-btn ${l.nome.toLowerCase()}`}
-                onClick={() => setLente(l.img)}
-              >
-                {l.nome}
-              </button>
-            ))}
+            <div className="lens-options">
+              {opcoes.lentes.map((l, index) => {
+
+                const selecionada = lentesSelecionadas.find(item => item.nome === l.nome)
+
+                return (
+                  <button
+                    key={index}
+                    className={selecionada ? "ativo" : ""}
+                    onClick={() => toggleLente(l)}
+                  >
+                    <img src={l.img} alt={l.nome} />
+                  </button>
+                )
+              })}
+            </div>
           </div>
 
-        </div>
+          {/* 📦 RESUMO */}
+          <div className="summary">
+            <p><strong>Tipo:</strong> {tipoArmacao}</p>
+            <p><strong>Armação:</strong> {corArmacao || "-"}</p>
+            <p><strong>Lentes:</strong> {lentesSelecionadas.map(l => l.nome).join(", ") || "-"}</p>
+          </div>
 
+          {/* 🛒 BOTÃO */}
+          <button className="buy-button">
+            Comprar personalizado
+          </button>
+
+        </div>
       </div>
 
       <Footer />
