@@ -15,25 +15,99 @@
   flex: 1;                              /* ocupa metade */
   position: sticky;                     /* fixa ao rolar */
   top: 100px;                           /* distância do topo */
-  text-align: center;                   /* centraliza imagem */
+  text-align: center;                   /* centraliza */
 }
 
-.custom-glasses{
-  max-width: 420px;                     /* tamanho máximo */
-  width: 100%;                          /* responsivo */
+/* 🔥 NOVO: CONTAINER DE CAMADAS */
+
+.preview-container{
+  position: relative;                   /* base para sobreposição */
+  width: 500px;                        /* tamanho do preview aumentado */
+  height: 400px;                       /* altura aumentada */
+  margin: 0 auto;
+  background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%); /* fundo com gradiente */
+  border: 2px solid #ddd;              /* borda para visualizar o container */
+  border-radius: 12px;                 /* cantos arredondados */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* sombra suave */
+  display: flex;                       /* centralizar conteúdo */
+  align-items: center;
+  justify-content: center;
+}
+
+/* 🔥 CAMADAS */
+
+.preview-layer{
+  position: absolute;                   /* sobrepõe imagens */
+  top: 50%;                             /* centralizar verticalmente */
+  left: 50%;                            /* centralizar horizontalmente */
+  transform: translate(-50%, -50%);     /* ajuste para centralizar */
+  max-width: 90%;                       /* máximo de largura */
+  max-height: 90%;                      /* máximo de altura */
+  object-fit: contain;                  /* mantém proporção */
+  transition: all 0.3s ease;            /* transição suave ao trocar */
+}
+
+/* armação fica atrás */
+.preview-layer.frame{
+  z-index: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); /* sombra leve */
+}
+
+/* lente fica na frente */
+.preview-layer.lens{
+  z-index: 2;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05)); /* sombra mais leve */
+}
+
+/* 🎨 ARMAÇÕES */
+
+.armacoes-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 10px;
+}
+
+.armacoes-grid button{
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  border: 2px solid #ccc;
+  overflow: hidden;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.3s ease;
+  position: relative;
+  background: white;
+}
+
+.armacoes-grid button img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* hover effect - vizualiza em tempo real */
+.armacoes-grid button:hover{
+  transform: scale(1.15);
+  border-color: #00ff88;
+  box-shadow: 0 0 12px rgba(0,255,136,0.4);
+}
+
+.armacoes-grid button:hover .tooltip{
+  opacity: 1;
 }
 
 /* ⚙️ CONFIG */
 
 .custom-right{
-  flex: 1;                              /* ocupa metade */
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 25px;                            /* espaço entre seções */
+  gap: 25px;
 }
 
 .custom-right h1{
-  font-size: 28px;                      /* título do produto */
+  font-size: 28px;
 }
 
 /* 📦 SECTIONS */
@@ -61,71 +135,46 @@
 }
 
 .tipo-armacao button:hover{
-  background: #f5f5f5;                 /* leve efeito */
+  background: #f5f5f5;
 }
 
-/* 🎨 CORES */
+/* 🎨 CORES - REMOVIDO - Usando imagens de armações em vez de cores */
 
-.cores{
+/* Mantido como comentário para referência futura */
+/* .cores{
   display: flex;
-  flex-wrap: wrap;                     /* quebra linha */
+  flex-wrap: wrap;
   gap: 10px;
 }
 
 .cores button{
   width: 45px;
   height: 45px;
-  border-radius: 50%;                  /* bolinha */
+  border-radius: 50%;
   border: 2px solid #ccc;
   cursor: pointer;
   transition: all 0.2s ease;
-  position: relative;                  /* necessário pro tooltip */
+  position: relative;
 }
-
-/* 🔥 HOVER (efeito loja real) */
 
 .cores button:hover{
   transform: scale(1.1);
 }
 
-/* 🎨 CORES REAIS */
-
 .preto{ background: #000; }
-
-.branco{ 
-  background: #fff; 
-  border: 2px solid #aaa;              /* destaque */
-}
-
+.branco{ background: #fff; border: 2px solid #aaa; }
 .bege{ background: #f5deb3; }
-
 .cinza{ background: #808080; }
-
-/* ✨ transparente brilhante */
-
-.transparente-brilhante{ 
-  background: rgba(255,255,255,0.3);
-  border: 2px solid #aaa;
-  box-shadow: inset 0 0 8px rgba(255,255,255,0.8);
-}
-
-/* 🌫️ transparente fosco */
-
-.transparente-fosco{ 
-  background: rgba(200,200,200,0.25);
-  border: 2px dashed #999;
-  backdrop-filter: blur(2px);
-}
-
-/* 🟠 laranja */
-
+.transparente-brilhante{ background: rgba(255,255,255,0.3); border: 2px solid #aaa; box-shadow: inset 0 0 8px rgba(255,255,255,0.8); }
+.transparente-fosco{ background: rgba(200,200,200,0.25); border: 2px dashed #999; backdrop-filter: blur(2px); }
 .laranja{ background: orange; }
+*/ 
 
-/* 🏷️ TOOLTIP (nome da cor) */
+/* 🏷️ TOOLTIP */
 
 .tooltip{
   position: absolute;
-  bottom: -30px;                        /* aparece abaixo */
+  bottom: -30px;
   left: 50%;
   transform: translateX(-50%);
 
@@ -136,13 +185,11 @@
   border-radius: 5px;
 
   white-space: nowrap;
-  opacity: 0;                           /* escondido */
+  opacity: 0;
   pointer-events: none;
 
   transition: 0.2s;
 }
-
-/* mostra tooltip no hover */
 
 .cores button:hover .tooltip{
   opacity: 1;
@@ -151,7 +198,7 @@
 /* 👓 LENTES */
 
 .lens-options{
-  display: grid;                         /* layout organizado */
+  display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
 }
@@ -164,25 +211,29 @@
   overflow: hidden;
   cursor: pointer;
   padding: 0;
-  transition: 0.2s;
+  transition: all 0.3s ease;
+  position: relative;
+  background: white;
 }
 
 .lens-options button:hover{
-  transform: scale(1.05);               /* leve zoom */
+  transform: scale(1.15);
+  border-color: #00ff88;
+  box-shadow: 0 0 12px rgba(0,255,136,0.4);
 }
 
 .lens-options img{
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
-/* 🔥 ATIVO (selecionado) */
+/* 🔥 ATIVO */
 
 .ativo{
-  border: 2px solid #00ff88 !important;          /* borda verde */
-  box-shadow: 0 0 0 3px rgba(0,255,136,0.3);     /* halo externo */
-  transform: scale(1.1);                         /* leve aumento */
+  border: 2px solid #00ff88 !important;
+  box-shadow: 0 0 0 3px rgba(0,255,136,0.3);
+  transform: scale(1.1);
 }
 
 /* 📦 RESUMO */
@@ -211,20 +262,19 @@
   transform: scale(1.02);
 }
 
-
-
 /* 📱 MOBILE */
 
 @media (max-width: 900px){
   .custom-container{
-    flex-direction: row;             /* empilha */
+    flex-direction: column; /* melhor pra mobile */
   }
 
   .custom-left{
-    position: static;                  /* remove fixo */
+    position: static;
   }
 
-  .custom-glasses{
-    max-width: 250px;                  /* menor */
+  .preview-container{
+    width: 280px;
+    height: 180px;
   }
 }

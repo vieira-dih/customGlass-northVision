@@ -8,15 +8,19 @@ import products from "../../data/products"                    // Onde ficam os d
 
 // --- IMPORTAÇÃO DE IMAGENS ---
 // Se adicionar uma lente nova, importe o arquivo .png aqui com um nome único
-import lensPreta from "../../assets/glasses/radar-ev/curvo/lens-preta.png"
-import lensAzulClaro from "../../assets/glasses/radar-ev/curvo/lens-azul-claro.png"
-import lensAzulEscuro from "../../assets/glasses/radar-ev/curvo/lens-azul-escuro.png"
-import lensAmarela from "../../assets/glasses/radar-ev/curvo/lens-amarela.png"
-import lensPrata from "../../assets/glasses/radar-ev/curvo/lens-prata.png"
-import lensRoxa from "../../assets/glasses/radar-ev/curvo/lens-roxa.png"
-import lensVermelha from "../../assets/glasses/radar-ev/curvo/lens-vermelha.png"
-import lensTransparente from "../../assets/glasses/radar-ev/curvo/lens-transparente.png"
-import lensVerde from "../../assets/glasses/radar-ev/curvo/lens-verde.png"
+import lensAzul from "../../assets/glasses/radar-ev/curvo/lentes/lens-azul.png"
+import lensPrata from "../../assets/glasses/radar-ev/curvo/lentes/lens-prata.png"
+import lensRoxa from "../../assets/glasses/radar-ev/curvo/lentes/lens-roxa.png"
+import lensVermelha from "../../assets/glasses/radar-ev/curvo/lentes/lens-vermelha.png"
+
+// --- IMPORTAÇÃO DE ARMAÇÕES ---
+import armacaoPreta from "../../assets/glasses/radar-ev/curvo/armaçoes/armação-preta.png"
+import armacaoBranca from "../../assets/glasses/radar-ev/curvo/armaçoes/armação-branca.png"
+import armacaoBege from "../../assets/glasses/radar-ev/curvo/armaçoes/armação-bege.png"
+import armacaoCinza from "../../assets/glasses/radar-ev/curvo/armaçoes/armação-cinza.png"
+import armacaoMarrom from "../../assets/glasses/radar-ev/curvo/armaçoes/armação-marrom.png"
+import armacaoTranspBrilho from "../../assets/glasses/radar-ev/curvo/armaçoes/armação-transparente-brilhante.png"
+import armacaoTranspFosco from "../../assets/glasses/radar-ev/curvo/armaçoes/armação-transparente-fosco.png"
 
 import "./productPage.css"                                    // Arquivo de estilos (mude cores e tamanhos aqui)
 
@@ -27,32 +31,41 @@ function ProductPage() {
 
   // --- ESTADOS (O QUE O USUÁRIO ESCOLHE) ---
   const [tipoArmacao, setTipoArmacao] = useState("curvo")     // Define qual categoria de lentes mostrar primeiro
-  const [corArmacao, setCorArmacao] = useState(null)          // Guarda a cor que o usuário clicou
+  const [armacaoSelecionada, setArmacaoSelecionada] = useState(armacaoPreta) // Armação escolhida
+  const [armacaoHover, setArmacaoHover] = useState(null)      // Armação em hover (pré-visualização)
+  const [lenteSelecionada, setLenteSelecionada] = useState(lensAzul) // Lente selecionada para o preview
+  const [lenteHover, setLenteHover] = useState(null)          // Lente em hover (pré-visualização)
   const [lentesSelecionadas, setLentesSelecionadas] = useState([]) // Array que guarda até 5 objetos de lentes
-  const [preview, setPreview] = useState(lensPreta)           // Define qual imagem aparece no destaque principal
+  const [preview, setPreview] = useState(lensAzul)           // Define qual imagem aparece no destaque principal
 
   // --- DICIONÁRIO DE CONFIGURAÇÃO ---
   // Para adicionar um novo tipo (ex: "quadrado"), crie uma nova chave abaixo de "reto"
   const config = {
     curvo: {
-      cores: ["preto", "branco","laranja", "cinza", "bege", "transparente brilhante", "transparente fosco"],
+      armacoes: [
+        { nome: "Preta", img: armacaoPreta },
+        { nome: "Branca", img: armacaoBranca },
+        { nome: "Bege", img: armacaoBege },
+        { nome: "Cinza", img: armacaoCinza },
+        { nome: "Marrom", img: armacaoMarrom },
+        { nome: "Transparente Brilhante", img: armacaoTranspBrilho },
+        { nome: "Transparente Fosco", img: armacaoTranspFosco },
+      ],
       lentes: [
-        { nome: "Preta", img: lensPreta },                    // Para mudar o nome exibido, mude o 'nome'
-        { nome: "Azul Claro", img: lensAzulClaro },           // Para mudar a imagem, mude o 'img'
-        { nome: "Azul Escuro", img: lensAzulEscuro },
-        { nome: "Vermelha", img: lensVermelha },
-        { nome: "Amarela", img: lensAmarela },
-        { nome: "Prata", img: lensPrata },
+        { nome: "Azul", img: lensAzul },                      // Para mudar o nome exibido, mude o 'nome'
+        { nome: "Prata", img: lensPrata },                    // Para mudar a imagem, mude o 'img'
         { nome: "Roxa", img: lensRoxa },
-        { nome: "Transparente", img: lensTransparente },
-        { nome: "Verde", img: lensVerde },
+        { nome: "Vermelha", img: lensVermelha },
       ]
     },
     reto: {
-      cores: ["preto", "cinza", "marrom", "verde"],
+      armacoes: [
+        { nome: "Preta", img: armacaoPreta },
+        { nome: "Cinza", img: armacaoCinza },
+      ],
       lentes: [
-        { nome: "Preta", img: lensPreta },
-        { nome: "Azul Claro", img: lensAzulClaro },
+        { nome: "Azul", img: lensAzul },
+        { nome: "Prata", img: lensPrata },
       ]
     }
   }
@@ -70,9 +83,9 @@ function ProductPage() {
 
       // Se removeu, mostra a imagem da lente anterior ou a padrão
       if (novas.length > 0) {
-        setPreview(novas[novas.length - 1].img)
+        setLenteSelecionada(novas[novas.length - 1].img)
       } else {
-        setPreview(lensPreta)
+        setLenteSelecionada(lensAzul)
       }
 
     } else {
@@ -80,11 +93,21 @@ function ProductPage() {
       if (lentesSelecionadas.length < 5) {
         const novas = [...lentesSelecionadas, lente]
         setLentesSelecionadas(novas)
-        setPreview(lente.img)                                 // Faz a lente clicada "aparecer" no óculos
+        setLenteSelecionada(lente.img)                        // Faz a lente clicada aparecer no preview
       } else {
         alert("Máximo de 5 lentes")                           // Mensagem de erro de limite
       }
     }
+  }
+
+  // --- LÓGICA DE MUDANÇA DE TIPO ---
+  const mudarTipo = (novoTipo) => {
+    setTipoArmacao(novoTipo)
+    setArmacaoSelecionada(config[novoTipo].armacoes[0].img)
+    setArmacaoHover(null)
+    setLenteSelecionada(lensAzul)
+    setLentesSelecionadas([])
+    setPreview(lensAzul)
   }
 
   // Se o usuário digitar um link que não existe, mostra erro
@@ -96,9 +119,14 @@ function ProductPage() {
 
       <div className="custom-container">
 
-        {/* --- ÁREA DA ESQUERDA (IMAGEM GRANDE) --- */}
+        {/* --- ÁREA DA ESQUERDA (IMAGEM EM CAMADAS) --- */}
         <div className="custom-left">
-          <img className="custom-glasses" src={preview} alt="Óculos" />
+          <div className="preview-container">
+            {/* Armação (atrás) */}
+            <img className="preview-layer frame" src={armacaoHover || armacaoSelecionada} alt="Armação" />
+            {/* Lente (na frente) */}
+            <img className="preview-layer lens" src={lenteHover || lenteSelecionada} alt="Lente" />
+          </div>
         </div>
 
         {/* --- ÁREA DA DIREITA (OPÇÕES) --- */}
@@ -111,41 +139,31 @@ function ProductPage() {
             <h2>Tipo de armação</h2>
             <div className="tipo-armacao">
               <button
-                className={tipoArmacao === "curvo" ? "ativo" : ""} // Classe 'ativo' para pintar o botão selecionado
-                onClick={() => {
-                  setTipoArmacao("curvo")
-                  setCorArmacao(null)                         // Reseta a cor ao trocar o tipo
-                  setLentesSelecionadas([])                   // Limpa o carrinho ao trocar o tipo
-                  setPreview(lensPreta)
-                }}
+                className={tipoArmacao === "curvo" ? "ativo" : ""}
+                onClick={() => mudarTipo("curvo")}
               > Curvo </button>
 
               <button
                 className={tipoArmacao === "reto" ? "ativo" : ""}
-                onClick={() => {
-                  setTipoArmacao("reto")
-                  setCorArmacao(null)
-                  setLentesSelecionadas([])
-                  setPreview(lensPreta)
-                }}
+                onClick={() => mudarTipo("reto")}
               > Reto </button>
             </div>
           </div>
 
-          {/* SEÇÃO: CORES (Mapeia as cores do config) */}
+          {/* SEÇÃO: ARMAÇÕES (Mapeia as armações do config) */}
           <div className="section">
-            <h2>Cor da armação</h2>
-            <div className="cores">
-              {opcoes.cores.map(cor => (
+            <h2>Escolha a armação</h2>
+            <div className="armacoes-grid">
+              {opcoes.armacoes.map((a, index) => (
                 <button
-                  key={cor}
-                  className={`
-                    ${cor.toLowerCase().replace(/\s+/g, "-")} 
-                    ${corArmacao === cor ? "ativo" : ""}
-                  `}                                          // Cria classes como "preto", "transparente-fosco"
-                  onClick={() => setCorArmacao(cor)}
+                  key={index}
+                  className={armacaoSelecionada === a.img ? "ativo" : ""}
+                  onClick={() => setArmacaoSelecionada(a.img)}
+                  onMouseEnter={() => setArmacaoHover(a.img)}
+                  onMouseLeave={() => setArmacaoHover(null)}
                 >
-                  <span className="tooltip">{cor}</span>
+                  <img src={a.img} alt={a.nome} />
+                  <span className="tooltip">{a.nome}</span>
                 </button>
               ))}
             </div>
@@ -162,6 +180,8 @@ function ProductPage() {
                     key={index}
                     className={selecionada ? "ativo" : ""}    // Dá destaque visual se a lente for escolhida
                     onClick={() => toggleLente(l)}
+                    onMouseEnter={() => setLenteHover(l.img)}
+                    onMouseLeave={() => setLenteHover(null)}
                   >
                     <img src={l.img} alt={l.nome} />
                   </button>
@@ -173,7 +193,7 @@ function ProductPage() {
           {/* SEÇÃO: RESUMO (Mostra o que foi escolhido em texto) */}
           <div className="summary">
             <p><strong>Tipo:</strong> {tipoArmacao}</p>
-            <p><strong>Armação:</strong> {corArmacao || "-"}</p>
+            <p><strong>Armação:</strong> {opcoes.armacoes.find(a => a.img === armacaoSelecionada)?.nome || "-"}</p>
             <p><strong>Lentes:</strong> {lentesSelecionadas.map(l => l.nome).join(", ") || "-"}</p>
           </div>
 
