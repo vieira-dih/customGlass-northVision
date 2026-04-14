@@ -72,7 +72,6 @@
   height: 80px;
   border-radius: 8px;
   border: 2px solid #ccc;
-  overflow: hidden;
   cursor: pointer;
   padding: 0;
   transition: all 0.3s ease;
@@ -208,7 +207,6 @@
   height: 50px;
   border-radius: 8px;
   border: 2px solid #ccc;
-  overflow: hidden;
   cursor: pointer;
   padding: 0;
   transition: all 0.3s ease;
@@ -220,6 +218,10 @@
   transform: scale(1.15);
   border-color: #00ff88;
   box-shadow: 0 0 12px rgba(0,255,136,0.4);
+}
+
+.lens-options button:hover .tooltip{
+  opacity: 1;
 }
 
 .lens-options img{

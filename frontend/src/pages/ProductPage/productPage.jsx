@@ -136,7 +136,7 @@ function ProductPage() {
 
           {/* SEÇÃO: TIPOS (Botões Curvo/Reto) */}
           <div className="section">
-            <h2>Tipo de armação</h2>
+            <h2>Tipo de lente</h2>
             <div className="tipo-armacao">
               <button
                 className={tipoArmacao === "curvo" ? "ativo" : ""}
@@ -184,6 +184,7 @@ function ProductPage() {
                     onMouseLeave={() => setLenteHover(null)}
                   >
                     <img src={l.img} alt={l.nome} />
+                    <span className="tooltip">{l.nome}</span>
                   </button>
                 )
               })}
