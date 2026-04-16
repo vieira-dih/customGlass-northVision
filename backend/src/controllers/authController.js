@@ -24,7 +24,14 @@ export const initiateOAuth = (req, res) => {
     console.log("🔄 Iniciando fluxo OAuth...")
     
     // Gerar URL de autorização do Nuvemshop
-    const authUrl = AuthService.generateAuthorizationUrl()
+    const { url: authUrl, state } = AuthService.generateAuthorizationUrl()
+    
+    // Armazenar state na sessão para verificar depois (CSRF protection)
+    req.session = req.session || {}
+    req.session.oauthState = state
+    
+    console.log("🔄 Redirecionando para Nuvemshop...")
+    console.log("   URL:", authUrl)
     
     // Redirecionar o usuário para o Nuvemshop
     // Lá ele verá um botão "Autorizar" para sua loja
@@ -304,6 +311,49 @@ export const validateTokenWithNuvemshop = async (req, res) => {
     
     res.status(500).json({
       erro: "Erro ao validar token com Nuvemshop",
+      mensagem: error.message,
+    })
+  }
+}
+
+// ======================================================
+// DIAGNOSTIC: Teste de Token com Store ID
+// ======================================================
+// Rota: POST /auth/test-token (PÚBLICA - sem JWT)
+// Body: { accessToken, storeId }
+// 
+// Endpoint para diagnosticar problemas com a API Nuvemshop
+
+export const testTokenDiagnostic = async (req, res) => {
+  try {
+    const { accessToken, storeId } = req.body
+    
+    if (!accessToken || !storeId) {
+      return res.status(400).json({
+        erro: "Parâmetros inválidos",
+        mensagem: "Informe: accessToken, storeId",
+      })
+    }
+    
+    console.log("🔧 DIAGNÓSTICO: Testando token e store_id...")
+    console.log("   StoreId recebido:", storeId)
+    console.log("   Token:", accessToken.substring(0, 20) + "...")
+    
+    // Chamar função de validação completa
+    const validation = await AuthService.validateTokenWithAPI(storeId, accessToken)
+    
+    res.json({
+      mensagem: "Diagnóstico completo",
+      resultado: validation,
+      recomendacoes: validation.valid 
+        ? "✅ Token e endpoint funcionando!"
+        : "❌ Verifique: (1) Store ID correto? (2) Escopos no app? (3) Token expirado?"
+    })
+  } catch (error) {
+    console.error("❌ Erro no diagnóstico:", error)
+    
+    res.status(500).json({
+      erro: "Erro ao realizar diagnóstico",
       mensagem: error.message,
     })
   }

@@ -57,6 +57,16 @@ router.get(
 router.delete("/stores/:storeId", authenticateJWT, AuthController.disconnectStore)
 
 // ======================================================
+// ROTAS DE DIAGNÓSTICO (Públicas - sem autenticação)
+// ======================================================
+
+// Rota 7: Testar token e diagnosticar problemas
+// POST /auth/test-token
+// Body: { accessToken, storeId }
+// Testa se o token funciona com o store_id fornecido
+router.post("/test-token", AuthController.testTokenDiagnostic)
+
+// ======================================================
 // Exportar router
 // ======================================================
 

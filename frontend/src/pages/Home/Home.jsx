@@ -29,28 +29,8 @@ function Home() {
         setErro(null)
       } catch (erro) {
         console.error("Erro ao carregar produtos:", erro)
-        setErro("Erro ao carregar produtos. Usando dados de exemplo...")
-        // Se falhar, usa os dados de exemplo (fallback)
-        setProdutos([
-          {
-            id: 1,
-            nome: "Radar EV",
-            slug: "radar-ev",
-            imagem: banner
-          },
-          {
-            id: 2,
-            nome: "Holbrook",
-            slug: "holbrook",
-            imagem: banner
-          },
-          {
-            id: 3,
-            nome: "Jawbreaker",
-            slug: "jawbreaker",
-            imagem: banner
-          }
-        ])
+        setErro("Erro ao carregar produtos: " + erro.message)
+        setProdutos([])
       } finally {
         setCarregando(false)
       }

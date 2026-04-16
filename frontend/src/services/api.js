@@ -4,7 +4,24 @@ const API_URL = "http://localhost:3000/api"
 
 export const buscarProdutos = async () => {
   try {
-    const response = await fetch(`${API_URL}/products`)
+    // Obter storeId e token do localStorage
+    const storeId = localStorage.getItem('storeId')
+    const token = localStorage.getItem('authToken')
+    
+    if (!storeId) {
+      throw new Error("Store ID não encontrado. Faça login primeiro.")
+    }
+    
+    if (!token) {
+      throw new Error("Token não encontrado. Faça login novamente.")
+    }
+    
+    const response = await fetch(`${API_URL}/products/${storeId}`, {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    })
+    
     if (!response.ok) throw new Error("Erro ao buscar produtos")
     return await response.json()
   } catch (error) {

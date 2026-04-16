@@ -55,21 +55,38 @@ export const getProducts = async (storeId) => {
     
     // Passo 1: Buscar access token do banco
     const accessToken = await AuthService.getAccessTokenForStore(storeId)
+    console.log(`🔑 Token recuperado (primeiros 20 chars):`, accessToken.substring(0, 20) + "...")
     
     // Passo 2: Obter store_id da Nuvemshop
     const store = await StoreModel.getStoreById(storeId)
+    console.log(`🏪 Store info:`, { id: store.id, nuvemshop_store_id: store.nuvemshop_store_id })
     
     // Passo 3: Criar cliente Axios com token
     const client = createNuvemshopClient(store.nuvemshop_store_id, accessToken)
     
-    // Passo 4: Fazer requisição GET /products
-    const response = await client.get("/products")
-    
-    console.log(`✅ ${response.data.length} produto(s) encontrado(s)`)
-    
-    return response.data
+    // Passo 4: Fazer requisição GET /products com parametrizações
+    try {
+      const response = await client.get("/products?limit=100")
+      console.log(`✅ ${response.data.length} produto(s) encontrado(s)`)
+      return response.data
+    } catch (innerError) {
+      // Se falhar com query params, tenta sem eles
+      console.log("⚠️ Tentando sem parametrizações...")
+      const response = await client.get("/products")
+      console.log(`✅ ${response.data.length} produto(s) encontrado(s)`)
+      return response.data
+    }
   } catch (error) {
-    console.error("❌ Erro ao buscar produtos:", error.response?.data || error.message)
+    console.error("❌ Erro ao buscar produtos:")
+    console.error("   Status:", error.response?.status)
+    console.error("   Dados:", error.response?.data)
+    console.error("   Mensagem:", error.message)
+    console.error("   Config:", {
+      baseURL: error.config?.baseURL,
+      url: error.config?.url,
+      method: error.config?.method,
+      headers: error.config?.headers,
+    })
     throw error
   }
 }

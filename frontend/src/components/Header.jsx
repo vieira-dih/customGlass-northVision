@@ -1,5 +1,6 @@
 import "../styles/header.css"
 import logo from "../assets/northvision-logo.webp"
+import OAuthButton from "./OAuthButton"
 
 function Header(){
 
@@ -11,6 +12,7 @@ function Header(){
 
       <nav>
         <a href="/">Home</a>
+        <OAuthButton />
       </nav>
 
     </header>

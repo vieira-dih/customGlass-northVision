@@ -23,10 +23,10 @@ dotenv.config()
 // CONSTANTES - URLs da Nuvemshop OAuth
 // ======================================================
 
-// URL onde o usuário autoriza a aplicação
+// URL onde o usuário autoriza a aplicação (com www!)
 const NUVEMSHOP_AUTHORIZE_URL = "https://www.nuvemshop.com.br/apps/authorize"
 
-// URL para trocar code por token
+// URL para trocar code por token (com www!)
 const NUVEMSHOP_TOKEN_URL = "https://www.nuvemshop.com.br/apps/authorize/token"
 
 // API base da Nuvemshop para chamadas autenticadas
@@ -40,6 +40,11 @@ const NUVEMSHOP_API_BASE = "https://api.nuvemshop.com.br/v1"
 
 export const generateAuthorizationUrl = () => {
   try {
+    // Gerar um state único para segurança (previne CSRF)
+    // O state será incluído na URL de callback e deve ser verificado
+    const state = Math.random().toString(36).substring(2, 15) + 
+                  Math.random().toString(36).substring(2, 15)
+    
     // Construir parâmetros da URL
     const params = new URLSearchParams({
       // ID da aplicação registrada na Nuvemshop
@@ -50,13 +55,21 @@ export const generateAuthorizationUrl = () => {
       
       // Tipo de resposta sempre é 'code' (OAuth 2.0)
       response_type: "code",
+      
+      // State parameter para segurança (CSRF prevention)
+      state: state,
     })
     
     // Montar URL completa
     const authUrl = `${NUVEMSHOP_AUTHORIZE_URL}?${params.toString()}`
     
     console.log("✅ URL de autorização gerada")
-    return authUrl
+    console.log("📍 CLIENT_ID:", process.env.NUVEMSHOP_CLIENT_ID)
+    console.log("📍 REDIRECT_URI:", process.env.NUVEMSHOP_REDIRECT_URI)
+    console.log("📍 STATE:", state)
+    console.log("📍 URL Completa:", authUrl)
+    
+    return { url: authUrl, state }
   } catch (error) {
     console.error("❌ Erro ao gerar URL de autorização:", error)
     throw error
@@ -96,6 +109,10 @@ export const exchangeCodeForToken = async (code) => {
       },
     })
     
+    // DEBUG: Ver estrutura completa da resposta
+    console.log("📦 Resposta completa do Nuvemshop:")
+    console.log(response.data)
+    
     // Extrair dados importantes da resposta
     const {
       access_token,    // Token de acesso para chamar API da Nuvemshop
@@ -107,10 +124,46 @@ export const exchangeCodeForToken = async (code) => {
     console.log("   Store ID:", store_id)
     console.log("   User ID:", user_id)
     
+    // Se store_id não veio na resposta, buscar da API
+    let finalStoreId = store_id
+    if (!finalStoreId) {
+      console.log("🔄 Store ID não recebido, buscando da API Nuvemshop...")
+      
+      try {
+        // Primeira tentativa: endpoint de store sem store_id
+        console.log("   Tentativa 1: GET /v1/store")
+        const storeResponse = await axios.get(
+          `${NUVEMSHOP_API_BASE}/store`,
+          {
+            headers: {
+              Authorization: `bearer ${access_token}`,
+              "User-Agent": "CustomGlassNorthVision (integrations@customglass.com)",
+              "Content-Type": "application/json",
+            },
+          }
+        )
+        
+        finalStoreId = storeResponse.data.id
+        console.log("✅ Store ID obtido da API:", finalStoreId)
+        console.log("   Store name:", storeResponse.data.name)
+      } catch (apiError) {
+        console.error("❌ GET /v1/store retornou:", {
+          status: apiError.response?.status,
+          statusText: apiError.response?.statusText,
+          data: apiError.response?.data,
+        })
+        
+        // Fallback: se API falhar, tentar usar user_id como store_id
+        finalStoreId = user_id
+        console.log("⚠️ Usando user_id como store_id:", finalStoreId)
+        console.log("⚠️ NOTA: Verificar se este é o store_id correto no Nuvemshop Dashboard")
+      }
+    }
+    
     return {
       access_token,
       user_id,
-      store_id,
+      store_id: finalStoreId,
     }
   } catch (error) {
     console.error("❌ Erro ao trocar code por token:", error.response?.data || error.message)
@@ -254,32 +307,109 @@ export const getAccessTokenForStore = async (storeId) => {
 export const validateTokenWithAPI = async (storeId, accessToken) => {
   try {
     console.log("🔄 Validando token com API Nuvemshop...")
+    console.log("   Store ID:", storeId)
+    console.log("   Token (primeiros 20 chars):", accessToken.substring(0, 20) + "...")
     
-    // Fazer requuisição simples à API (buscar informações da loja)
-    const response = await axios.get(
-      `${NUVEMSHOP_API_BASE}/${storeId}/store`,
-      {
-        headers: {
-          // Authorization com Bearer token
-          "Authorization": `bearer ${accessToken}`,
-          
-          // Identificar a aplicação
-          "User-Agent": "CustomGlassNorthVision (integrations@customglass.com)",
-          
-          "Content-Type": "application/json",
-        },
+    // TESTE 1: GET /v1/store (sem store_id) - Recomendado para validar real store ID
+    console.log("\n   📌 TESTE 1: GET /v1/store (sem store_id na URL)")
+    try {
+      const response1 = await axios.get(
+        `${NUVEMSHOP_API_BASE}/store`,
+        {
+          headers: {
+            "Authorization": `bearer ${accessToken}`,
+            "User-Agent": "CustomGlassNorthVision (integrations@customglass.com)",
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      
+      console.log("   ✅ Sucesso! Store data:")
+      console.log("      ID:", response1.data.id)
+      console.log("      Name:", response1.data.name)
+      console.log("      Domain:", response1.data.domain)
+      
+      return {
+        valid: true,
+        method: "/v1/store",
+        storeName: response1.data.name,
+        actualStoreId: response1.data.id,
+        data: response1.data,
       }
-    )
+    } catch (error1) {
+      console.error("   ❌ TESTE 1 falhou:", error1.response?.status, error1.response?.data?.message)
+    }
     
-    console.log("✅ Token validado com sucesso")
-    console.log("   Loja:", response.data.name)
+    // TESTE 2: GET /v1/{storeId}/store (com store_id na URL)
+    console.log("\n   📌 TESTE 2: GET /v1/{storeId}/store (com store_id na URL)")
+    try {
+      const response2 = await axios.get(
+        `${NUVEMSHOP_API_BASE}/${storeId}/store`,
+        {
+          headers: {
+            "Authorization": `bearer ${accessToken}`,
+            "User-Agent": "CustomGlassNorthVision (integrations@customglass.com)",
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      
+      console.log("   ✅ Sucesso! Store data:")
+      console.log("      ID:", response2.data.id)
+      console.log("      Name:", response2.data.name)
+      
+      return {
+        valid: true,
+        method: `/v1/${storeId}/store`,
+        storeName: response2.data.name,
+        actualStoreId: response2.data.id,
+        data: response2.data,
+      }
+    } catch (error2) {
+      console.error("   ❌ TESTE 2 falhou:", error2.response?.status, error2.response?.data?.message)
+    }
+    
+    // TESTE 3: GET /v1/{storeId}/products (formato esperado)
+    console.log("\n   📌 TESTE 3: GET /v1/{storeId}/products (com limite)")
+    try {
+      const response3 = await axios.get(
+        `${NUVEMSHOP_API_BASE}/${storeId}/products?limit=10`,
+        {
+          headers: {
+            "Authorization": `bearer ${accessToken}`,
+            "User-Agent": "CustomGlassNorthVision (integrations@customglass.com)",
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      
+      console.log("   ✅ Sucesso! Produtos encontrados:", response3.data.length)
+      
+      return {
+        valid: true,
+        method: `/v1/${storeId}/products`,
+        productsCount: response3.data.length,
+        data: response3.data,
+      }
+    } catch (error3) {
+      console.error("   ❌ TESTE 3 falhou:", error3.response?.status, error3.response?.data?.message)
+    }
+    
+    // Se chegou aqui, nenhum teste passou
+    console.error("❌ TODOS OS TESTES FALHARAM")
+    console.error("   Possíveis causas:")
+    console.error("   1. Token inválido ou expirado")
+    console.error("   2. Store ID incorreto")
+    console.error("   3. Escopos insuficientes no app Nuvemshop")
+    console.error("   4. API rejeitando requisições da nossa aplicação") 
     
     return {
-      valid: true,
-      storeName: response.data.name,
+      valid: false,
+      error: "Token validation failed on all endpoints",
+      message: "Nenhum endpoint respondeu com sucesso",
     }
   } catch (error) {
-    console.error("❌ Erro ao validar token:", error.response?.data || error.message)
+    console.error("❌ Erro inesperado ao validar token:", error.message)
     return {
       valid: false,
       error: error.message,
