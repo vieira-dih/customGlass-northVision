@@ -92,7 +92,7 @@ export const handleOAuthCallback = async (req, res) => {
     
     // Retornar HTML que redireciona para frontend com JWT na URL
     // O frontend irá capturar o JWT e armazenar em LocalStorage
-    const frontendUrl = `http://localhost:5173/auth-callback?token=${jwt}&storeId=${storeId}&isNew=${isNew}`
+    const frontendUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth-callback?token=${jwt}&storeId=${storeId}&isNew=${isNew}`
     
     // HTML que redireciona automaticamente
     const htmlResponse = `
@@ -118,7 +118,7 @@ export const handleOAuthCallback = async (req, res) => {
     console.error("❌ Erro ao processar callback:", error)
     
     // Redirecionar para frontend com erro
-    const errorUrl = `http://localhost:5173/auth-callback?error=${encodeURIComponent(error.message)}`
+    const errorUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth-callback?error=${encodeURIComponent(error.message)}`
     
     const htmlResponse = `
       <!DOCTYPE html>

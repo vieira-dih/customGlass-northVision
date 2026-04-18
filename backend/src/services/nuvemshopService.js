@@ -31,9 +31,11 @@ const createNuvemshopClient = (storeId, accessToken) => {
     baseURL: `${NUVEMSHOP_API_BASE}/${storeId}`,
     
     // Headers obrigatórios da Nuvemshop
+    // IMPORTANTE: Nuvemshop usa "Authentication" (NÃO "Authorization"!)
+    // E "bearer" deve ser todo minúsculo
     headers: {
-      // Token de acesso OAuth
-      "Authorization": `bearer ${accessToken}`,
+      // Token de acesso OAuth - DEVE ser "Authentication" e "bearer" minúsculo
+      "Authentication": `bearer ${accessToken}`,
       
       // Identificar a aplicação (obrigatório)
       "User-Agent": "CustomGlassNorthVision (integrations@customglass.com)",

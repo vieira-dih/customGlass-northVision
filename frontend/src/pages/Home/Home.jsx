@@ -11,25 +11,33 @@ function Home() {
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState(null)
 
+  const isAutenticado = localStorage.getItem('authToken') && localStorage.getItem('storeId')
+
   useEffect(() => {
     const carregarProdutos = async () => {
+      if (!isAutenticado) {
+        setCarregando(false)
+        setErro("Conecte sua loja Nuvemshop clicando em 'Instalar aplicativo' acima.")
+        return
+      }
+
       try {
         setCarregando(true)
         const dados = await buscarProdutos()
         
         // Transforma os dados da API para o formato esperado
-        const produtosFormatados = dados.map((produto) => ({
+        const produtosFormatados = (Array.isArray(dados) ? dados : []).map((produto) => ({
           id: produto.id,
-          nome: produto.name,
-          imagem: produto.image?.src || produto.images?.[0]?.src || banner,
-          slug: produto.slug || produto.name.toLowerCase().replace(/\s+/g, "-")
+          nome: produto.name?.pt || produto.name || 'Sem nome',
+          imagem: produto.images?.[0]?.src || produto.image?.src || banner,
+          slug: produto.handle?.pt || produto.handle || produto.name?.pt?.toLowerCase().replace(/\s+/g, "-") || `produto-${produto.id}`
         }))
         
         setProdutos(produtosFormatados)
         setErro(null)
       } catch (erro) {
         console.error("Erro ao carregar produtos:", erro)
-        setErro("Erro ao carregar produtos: " + erro.message)
+        setErro(erro.message)
         setProdutos([])
       } finally {
         setCarregando(false)

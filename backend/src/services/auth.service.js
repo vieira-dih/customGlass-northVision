@@ -23,8 +23,9 @@ dotenv.config()
 // CONSTANTES - URLs da Nuvemshop OAuth
 // ======================================================
 
-// URL onde o usuário autoriza a aplicação (com www!)
-const NUVEMSHOP_AUTHORIZE_URL = "https://www.nuvemshop.com.br/apps/authorize"
+// URL base de autorização - o client_id vai NO PATH, não como query param
+// Formato: https://www.nuvemshop.com.br/apps/{client_id}/authorize
+const NUVEMSHOP_AUTHORIZE_BASE = "https://www.nuvemshop.com.br/apps"
 
 // URL para trocar code por token (com www!)
 const NUVEMSHOP_TOKEN_URL = "https://www.nuvemshop.com.br/apps/authorize/token"
@@ -45,11 +46,8 @@ export const generateAuthorizationUrl = () => {
     const state = Math.random().toString(36).substring(2, 15) + 
                   Math.random().toString(36).substring(2, 15)
     
-    // Construir parâmetros da URL
+    // Construir parâmetros da URL (SEM client_id - ele vai no path)
     const params = new URLSearchParams({
-      // ID da aplicação registrada na Nuvemshop
-      client_id: process.env.NUVEMSHOP_CLIENT_ID,
-      
       // Onde retornar após autorização (MUST estar registrado no Nuvemshop)
       redirect_uri: process.env.NUVEMSHOP_REDIRECT_URI,
       
@@ -60,8 +58,9 @@ export const generateAuthorizationUrl = () => {
       state: state,
     })
     
-    // Montar URL completa
-    const authUrl = `${NUVEMSHOP_AUTHORIZE_URL}?${params.toString()}`
+    // Montar URL completa: /apps/{client_id}/authorize?params
+    const clientId = process.env.NUVEMSHOP_CLIENT_ID
+    const authUrl = `${NUVEMSHOP_AUTHORIZE_BASE}/${clientId}/authorize?${params.toString()}`
     
     console.log("✅ URL de autorização gerada")
     console.log("📍 CLIENT_ID:", process.env.NUVEMSHOP_CLIENT_ID)
@@ -133,10 +132,10 @@ export const exchangeCodeForToken = async (code) => {
         // Primeira tentativa: endpoint de store sem store_id
         console.log("   Tentativa 1: GET /v1/store")
         const storeResponse = await axios.get(
-          `${NUVEMSHOP_API_BASE}/store`,
+          `${NUVEMSHOP_API_BASE}/${user_id}/store`,
           {
             headers: {
-              Authorization: `bearer ${access_token}`,
+              "Authentication": `bearer ${access_token}`,
               "User-Agent": "CustomGlassNorthVision (integrations@customglass.com)",
               "Content-Type": "application/json",
             },
@@ -310,14 +309,14 @@ export const validateTokenWithAPI = async (storeId, accessToken) => {
     console.log("   Store ID:", storeId)
     console.log("   Token (primeiros 20 chars):", accessToken.substring(0, 20) + "...")
     
-    // TESTE 1: GET /v1/store (sem store_id) - Recomendado para validar real store ID
-    console.log("\n   📌 TESTE 1: GET /v1/store (sem store_id na URL)")
+    // TESTE 1: GET /v1/{storeId}/store - Formato correto da API Nuvemshop
+    console.log("\n   📌 TESTE 1: GET /v1/{storeId}/store")
     try {
       const response1 = await axios.get(
-        `${NUVEMSHOP_API_BASE}/store`,
+        `${NUVEMSHOP_API_BASE}/${storeId}/store`,
         {
           headers: {
-            "Authorization": `bearer ${accessToken}`,
+            "Authentication": `bearer ${accessToken}`,
             "User-Agent": "CustomGlassNorthVision (integrations@customglass.com)",
             "Content-Type": "application/json",
           },
@@ -340,14 +339,14 @@ export const validateTokenWithAPI = async (storeId, accessToken) => {
       console.error("   ❌ TESTE 1 falhou:", error1.response?.status, error1.response?.data?.message)
     }
     
-    // TESTE 2: GET /v1/{storeId}/store (com store_id na URL)
-    console.log("\n   📌 TESTE 2: GET /v1/{storeId}/store (com store_id na URL)")
+    // TESTE 2: GET /v1/{storeId}/store (com Authentication header)
+    console.log("\n   📌 TESTE 2: GET /v1/{storeId}/store (Authentication header)")
     try {
       const response2 = await axios.get(
         `${NUVEMSHOP_API_BASE}/${storeId}/store`,
         {
           headers: {
-            "Authorization": `bearer ${accessToken}`,
+            "Authentication": `bearer ${accessToken}`,
             "User-Agent": "CustomGlassNorthVision (integrations@customglass.com)",
             "Content-Type": "application/json",
           },
@@ -376,7 +375,7 @@ export const validateTokenWithAPI = async (storeId, accessToken) => {
         `${NUVEMSHOP_API_BASE}/${storeId}/products?limit=10`,
         {
           headers: {
-            "Authorization": `bearer ${accessToken}`,
+            "Authentication": `bearer ${accessToken}`,
             "User-Agent": "CustomGlassNorthVision (integrations@customglass.com)",
             "Content-Type": "application/json",
           },

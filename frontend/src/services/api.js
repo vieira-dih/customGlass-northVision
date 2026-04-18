@@ -9,11 +9,11 @@ export const buscarProdutos = async () => {
     const token = localStorage.getItem('authToken')
     
     if (!storeId) {
-      throw new Error("Store ID não encontrado. Faça login primeiro.")
+      throw new Error("Loja não conectada. Clique em 'Instalar aplicativo' para conectar.")
     }
     
     if (!token) {
-      throw new Error("Token não encontrado. Faça login novamente.")
+      throw new Error("Token expirado. Clique em 'Instalar aplicativo' para reconectar.")
     }
     
     const response = await fetch(`${API_URL}/products/${storeId}`, {
@@ -22,8 +22,15 @@ export const buscarProdutos = async () => {
       }
     })
     
-    if (!response.ok) throw new Error("Erro ao buscar produtos")
-    return await response.json()
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.mensagem || `Erro ${response.status} ao buscar produtos`)
+    }
+    
+    const data = await response.json()
+    
+    // A API retorna { mensagem, produtos } - extrair o array de produtos
+    return data.produtos || data
   } catch (error) {
     console.error("Erro na requisição:", error)
     throw error
