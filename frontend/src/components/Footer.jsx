@@ -1,3 +1,9 @@
+// ======================================================
+// Arquivo: components/Footer.jsx
+// ======================================================
+// Rodape simples exibido nas paginas principais.
+// ======================================================
+
 import "../styles/footer.css"
 
 function Footer(){

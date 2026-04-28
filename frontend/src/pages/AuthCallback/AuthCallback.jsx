@@ -1,3 +1,10 @@
+// ======================================================
+// Arquivo: pages/AuthCallback/AuthCallback.jsx
+// ======================================================
+// Pagina que recebe o retorno do OAuth da Nuvemshop.
+// Captura token/storeId da URL, salva no localStorage e volta para Home.
+// ======================================================
+
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
@@ -8,6 +15,7 @@ function AuthCallback() {
   const [mensagem, setMensagem] = useState('Processando autenticação...')
 
   useEffect(() => {
+    // Parametros enviados pelo backend apos finalizar OAuth
     const token = searchParams.get('token')
     const storeId = searchParams.get('storeId')
     const isNew = searchParams.get('isNew')
@@ -21,6 +29,7 @@ function AuthCallback() {
     }
 
     if (token) {
+      // Persistencia local para autenticar chamadas protegidas
       localStorage.setItem('authToken', token)
       localStorage.setItem('storeId', storeId)
       

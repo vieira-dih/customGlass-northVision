@@ -1,3 +1,14 @@
+// ======================================================
+// Arquivo: services/api.js
+// ======================================================
+// Camada unica de comunicacao HTTP do frontend com o backend.
+// Organizacao:
+// 1) Produtos protegidos (JWT)
+// 2) Produtos publicos
+// 3) Checkout personalizado
+// 4) Operacoes de carrinho
+// ======================================================
+
 const API_URL = "http://localhost:3000/api"
 
 const normalizeStoreCheckoutUrl = (rawUrl) => {
@@ -19,6 +30,7 @@ const normalizeStoreCheckoutUrl = (rawUrl) => {
 }
 
 const clearAuthSession = () => {
+  // Limpa credenciais locais quando o backend informar sessao invalida
   localStorage.removeItem("authToken")
   localStorage.removeItem("storeId")
 }
@@ -105,6 +117,7 @@ export const gerarCheckoutPersonalizado = async ({ productSlug, customizacao, st
     const data = await response.json()
 
     if (data?.checkoutUrl) {
+      // Normaliza fallback de lojas que nao possuem /checkout
       data.checkoutUrl = normalizeStoreCheckoutUrl(data.checkoutUrl)
     }
 
