@@ -2,7 +2,7 @@ import "./home.css"
 import { useState, useEffect } from "react"
 import Header from "../../components/Header"
 import Footer from "../../components/Footer"
-import { buscarProdutos } from "../../services/api"
+import { buscarProdutosPublicos } from "../../services/api"
 import ProductCard from "../../components/ProductCard"
 import banner from "../../assets/banner-north.png"
 
@@ -11,19 +11,11 @@ function Home() {
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState(null)
 
-  const isAutenticado = localStorage.getItem('authToken') && localStorage.getItem('storeId')
-
   useEffect(() => {
     const carregarProdutos = async () => {
-      if (!isAutenticado) {
-        setCarregando(false)
-        setErro("Conecte sua loja Nuvemshop clicando em 'Instalar aplicativo' acima.")
-        return
-      }
-
       try {
         setCarregando(true)
-        const dados = await buscarProdutos()
+        const dados = await buscarProdutosPublicos()
         
         // Transforma os dados da API para o formato esperado
         const produtosFormatados = (Array.isArray(dados) ? dados : []).map((produto) => ({

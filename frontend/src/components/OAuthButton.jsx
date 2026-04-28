@@ -5,10 +5,7 @@
 // Quando clicado, redireciona para /auth/nuvemshop
 // ======================================================
 
-import { useNavigate } from "react-router-dom"
-
-function OAuthButton() {
-  const navigate = useNavigate()
+function OAuthButton({ label = "Conectar loja" }) {
 
   const iniciarOAuth = () => {
     // Redirecionar para a rota do backend que inicia o OAuth
@@ -33,7 +30,7 @@ function OAuthButton() {
       onMouseOver={(e) => e.target.style.backgroundColor = "#0056b3"}
       onMouseOut={(e) => e.target.style.backgroundColor = "#007bff"}
     >
-      📦 Instalar aplicativo
+      {label}
     </button>
   )
 }

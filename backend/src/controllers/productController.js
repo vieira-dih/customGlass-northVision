@@ -6,6 +6,24 @@
 // ======================================================
 
 import * as NuvemshopService from "../services/nuvemshopService.js"
+import * as StoreModel from "../models/store.model.js"
+
+const resolvePublicStoreId = async (requestedStoreId) => {
+  if (requestedStoreId && !Number.isNaN(Number(requestedStoreId))) {
+    return Number(requestedStoreId)
+  }
+
+  if (process.env.PUBLIC_STORE_ID && !Number.isNaN(Number(process.env.PUBLIC_STORE_ID))) {
+    return Number(process.env.PUBLIC_STORE_ID)
+  }
+
+  const latestStore = await StoreModel.getLatestStore()
+  if (!latestStore) {
+    throw new Error("Nenhuma loja integrada encontrada")
+  }
+
+  return latestStore.id
+}
 
 // ======================================================
 // FUNÇÃO: Listar Produtos da Loja
@@ -41,6 +59,90 @@ export const listarProdutos = async (req, res) => {
     
     res.status(500).json({
       erro: "Erro ao buscar produtos",
+      mensagem: error.message,
+    })
+  }
+}
+
+// ======================================================
+// FUNÇÃO: Listar Produtos para vitrine pública
+// ======================================================
+// GET /api/public/products?storeId=1
+// Retorna: Array de produtos sem exigir JWT
+
+export const listarProdutosPublicos = async (req, res) => {
+  try {
+    const { storeId } = req.query
+    const internalStoreId = await resolvePublicStoreId(storeId)
+
+    console.log(`🌐 Controller: Buscando produtos públicos para loja ${internalStoreId}`)
+
+    const produtos = await NuvemshopService.getProducts(internalStoreId)
+
+    res.json({
+      mensagem: `${produtos.length} produto(s) encontrado(s)`,
+      storeId: internalStoreId,
+      produtos,
+    })
+  } catch (error) {
+    console.error("❌ Erro ao listar produtos públicos:", error.message)
+
+    res.status(500).json({
+      erro: "Erro ao buscar produtos públicos",
+      mensagem: error.message,
+    })
+  }
+}
+
+// ======================================================
+// FUNÇÃO: Gerar link de checkout da loja
+// ======================================================
+// POST /api/public/checkout-link
+// Body: { productSlug, customizacao, storeId? }
+
+export const gerarCheckoutLinkPublico = async (req, res) => {
+  try {
+    const { productSlug, customizacao, storeId } = req.body || {}
+
+    if (!productSlug) {
+      return res.status(400).json({
+        erro: "Parâmetro obrigatório",
+        mensagem: "Informe productSlug",
+      })
+    }
+
+    const internalStoreId = await resolvePublicStoreId(storeId)
+    const storeBaseUrl = (process.env.STORE_PUBLIC_URL || "").trim().replace(/\/+$/, "")
+
+    if (!storeBaseUrl) {
+      return res.status(400).json({
+        erro: "STORE_PUBLIC_URL não configurada",
+        mensagem: "Configure STORE_PUBLIC_URL no backend/.env com a URL pública da loja Nuvemshop",
+      })
+    }
+
+    const query = new URLSearchParams({
+      utm_source: "customglass",
+      utm_medium: "personalizador",
+      utm_campaign: "checkout_custom",
+    })
+
+    if (customizacao) {
+      query.set("custom", JSON.stringify(customizacao))
+    }
+
+    const checkoutUrl = `${storeBaseUrl}/produtos/${encodeURIComponent(productSlug)}?${query.toString()}`
+
+    res.json({
+      mensagem: "Link de checkout gerado",
+      storeId: internalStoreId,
+      checkoutUrl,
+    })
+  } catch (error) {
+    console.error("❌ Erro ao gerar link de checkout:", error.message)
+
+    res.status(500).json({
+      erro: "Erro ao gerar link de checkout",
       mensagem: error.message,
     })
   }

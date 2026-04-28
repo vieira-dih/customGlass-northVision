@@ -1,5 +1,10 @@
 const API_URL = "http://localhost:3000/api"
 
+const clearAuthSession = () => {
+  localStorage.removeItem("authToken")
+  localStorage.removeItem("storeId")
+}
+
 // ============= PRODUTOS =============
 
 export const buscarProdutos = async () => {
@@ -24,6 +29,11 @@ export const buscarProdutos = async () => {
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
+      if (response.status === 401 || response.status === 403) {
+        clearAuthSession()
+        throw new Error("Sessão expirada ou inválida. Clique em 'Conectar loja' para autenticar novamente.")
+      }
+
       throw new Error(errorData.mensagem || `Erro ${response.status} ao buscar produtos`)
     }
     
@@ -33,6 +43,50 @@ export const buscarProdutos = async () => {
     return data.produtos || data
   } catch (error) {
     console.error("Erro na requisição:", error)
+    throw error
+  }
+}
+
+export const buscarProdutosPublicos = async (storeId = null) => {
+  try {
+    const query = storeId ? `?storeId=${storeId}` : ""
+    const response = await fetch(`${API_URL}/public/products${query}`)
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.mensagem || `Erro ${response.status} ao buscar produtos`)
+    }
+
+    const data = await response.json()
+    return data.produtos || []
+  } catch (error) {
+    console.error("Erro na requisição pública de produtos:", error)
+    throw error
+  }
+}
+
+export const gerarCheckoutPersonalizado = async ({ productSlug, customizacao, storeId = null }) => {
+  try {
+    const response = await fetch(`${API_URL}/public/checkout-link`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        productSlug,
+        customizacao,
+        storeId,
+      }),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.mensagem || `Erro ${response.status} ao gerar checkout`)
+    }
+
+    return await response.json()
+  } catch (error) {
+    console.error("Erro ao gerar checkout personalizado:", error)
     throw error
   }
 }

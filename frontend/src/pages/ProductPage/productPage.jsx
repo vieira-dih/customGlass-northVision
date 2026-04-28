@@ -3,6 +3,7 @@ import { useState } from "react"                              // Gerencia o que 
 
 import Header from "../../components/Header"                  // Import do componente de topo
 import Footer from "../../components/Footer"                  // Import do componente de rodapé
+import { gerarCheckoutPersonalizado } from "../../services/api"
 
 import products from "../../data/products"                    // Onde ficam os dados (preço, nome, etc) dos produtos
 
@@ -30,6 +31,7 @@ function ProductPage() {
   const [corArmacao, setCorArmacao] = useState(null)          // Guarda a cor que o usuário clicou
   const [lentesSelecionadas, setLentesSelecionadas] = useState([]) // Array que guarda até 5 objetos de lentes
   const [preview, setPreview] = useState(lensPreta)           // Define qual imagem aparece no destaque principal
+  const [finalizandoCompra, setFinalizandoCompra] = useState(false)
 
   // --- DICIONÁRIO DE CONFIGURAÇÃO ---
   // Para adicionar um novo tipo (ex: "quadrado"), crie uma nova chave abaixo de "reto"
@@ -89,6 +91,34 @@ function ProductPage() {
 
   // Se o usuário digitar um link que não existe, mostra erro
   if (!produto) return <h1>Produto não encontrado</h1>
+
+  const handleComprarPersonalizado = async () => {
+    try {
+      setFinalizandoCompra(true)
+
+      const customizacao = {
+        tipoArmacao,
+        corArmacao,
+        lentes: lentesSelecionadas.map((lente) => lente.nome),
+      }
+
+      const response = await gerarCheckoutPersonalizado({
+        productSlug: produto.slug || slug,
+        customizacao,
+      })
+
+      if (!response?.checkoutUrl) {
+        throw new Error("Não foi possível gerar o link para finalizar na loja")
+      }
+
+      window.location.href = response.checkoutUrl
+    } catch (error) {
+      console.error("Erro ao finalizar compra personalizada:", error)
+      alert(error.message || "Erro ao redirecionar para checkout da loja")
+    } finally {
+      setFinalizandoCompra(false)
+    }
+  }
 
   return (
     <>
@@ -178,8 +208,8 @@ function ProductPage() {
           </div>
 
           {/* BOTÃO FINAL: Enviar para o carrinho */}
-          <button className="buy-button">
-            Comprar personalizado
+          <button className="buy-button" onClick={handleComprarPersonalizado} disabled={finalizandoCompra}>
+            {finalizandoCompra ? "Redirecionando..." : "Finalizar na loja"}
           </button>
 
         </div>
