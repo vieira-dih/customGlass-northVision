@@ -1,5 +1,23 @@
 const API_URL = "http://localhost:3000/api"
 
+const normalizeStoreCheckoutUrl = (rawUrl) => {
+  if (!rawUrl) return rawUrl
+
+  try {
+    const url = new URL(rawUrl)
+
+    // Em algumas lojas Nuvemshop, /checkout retorna 404.
+    // O caminho válido é /comprar/.
+    if (url.pathname === "/checkout") {
+      url.pathname = "/comprar/"
+    }
+
+    return url.toString()
+  } catch {
+    return rawUrl
+  }
+}
+
 const clearAuthSession = () => {
   localStorage.removeItem("authToken")
   localStorage.removeItem("storeId")
@@ -84,7 +102,13 @@ export const gerarCheckoutPersonalizado = async ({ productSlug, customizacao, st
       throw new Error(errorData.mensagem || `Erro ${response.status} ao gerar checkout`)
     }
 
-    return await response.json()
+    const data = await response.json()
+
+    if (data?.checkoutUrl) {
+      data.checkoutUrl = normalizeStoreCheckoutUrl(data.checkoutUrl)
+    }
+
+    return data
   } catch (error) {
     console.error("Erro ao gerar checkout personalizado:", error)
     throw error

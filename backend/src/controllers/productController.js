@@ -131,7 +131,12 @@ export const gerarCheckoutLinkPublico = async (req, res) => {
       query.set("custom", JSON.stringify(customizacao))
     }
 
-    const checkoutUrl = `${storeBaseUrl}/produtos/${encodeURIComponent(productSlug)}?${query.toString()}`
+    const checkoutPath = (process.env.STORE_CHECKOUT_PATH || "/comprar/").trim()
+    const normalizedCheckoutPath = checkoutPath.startsWith("/")
+      ? checkoutPath
+      : `/${checkoutPath}`
+
+    const checkoutUrl = `${storeBaseUrl}${normalizedCheckoutPath}?${query.toString()}`
 
     res.json({
       mensagem: "Link de checkout gerado",
