@@ -8,6 +8,9 @@
 function OAuthButton({ label = "Conectar loja" }) {
 
   const iniciarOAuth = () => {
+    console.log('🔄 Iniciando OAuth...')
+    console.log('📍 Redirecionando para: http://localhost:3000/auth/nuvemshop')
+    
     // Redirecionar para a rota do backend que inicia o OAuth
     // O backend vai fazer o redirect para Nuvemshop
     window.location.href = "http://localhost:3000/auth/nuvemshop"
