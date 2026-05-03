@@ -16,8 +16,8 @@ import { testConnection } from "./config/database.js"
 import productRoutes from "./routes/productRoutes.js"
 import authRoutes from "./routes/auth.routes.js"
 
-// Carregar variáveis de ambiente
-dotenv.config()
+// Carregar variáveis de ambiente (da raiz do projeto)
+dotenv.config({ path: '../.env' })
 
 // ======================================================
 // CRIAR APLICAÇÃO EXPRESS
