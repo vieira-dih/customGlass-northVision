@@ -20,6 +20,7 @@ function Home() {
         // Transforma os dados da API para o formato esperado
         const produtosFormatados = (Array.isArray(dados) ? dados : []).map((produto) => ({
           id: produto.id,
+          nuvemshopId: produto.id,
           nome: produto.name?.pt || produto.name || 'Sem nome',
           imagem: produto.images?.[0]?.src || produto.image?.src || banner,
           slug: produto.handle?.pt || produto.handle || produto.name?.pt?.toLowerCase().replace(/\s+/g, "-") || `produto-${produto.id}`
@@ -58,6 +59,7 @@ function Home() {
                 nome={produto.nome}
                 imagem={produto.imagem}
                 slug={produto.slug}
+                nuvemshopId={produto.nuvemshopId}
               />
             ))}
           </div>

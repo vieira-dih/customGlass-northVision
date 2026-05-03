@@ -95,7 +95,7 @@ export const buscarProdutosPublicos = async (storeId = null) => {
   }
 }
 
-export const gerarCheckoutPersonalizado = async ({ productSlug, customizacao, storeId = null }) => {
+export const gerarCheckoutPersonalizado = async ({ productSlug, customizacao, storeId = null, nuvemshopProductId = null, contato = null }) => {
   try {
     const response = await fetch(`${API_URL}/public/checkout-link`, {
       method: "POST",
@@ -104,8 +104,10 @@ export const gerarCheckoutPersonalizado = async ({ productSlug, customizacao, st
       },
       body: JSON.stringify({
         productSlug,
+        nuvemshopProductId,
         customizacao,
         storeId,
+        contato,
       }),
     })
 

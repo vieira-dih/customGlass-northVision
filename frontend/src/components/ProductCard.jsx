@@ -1,6 +1,10 @@
 import { Link } from "react-router-dom"                         // Link permite navegação sem recarregar página
 
-function ProductCard({ nome, imagem, slug }) {                  // recebe propriedades do produto
+function ProductCard({ nome, imagem, slug, nuvemshopId }) {     // recebe propriedades do produto
+
+  const linkTo = nuvemshopId
+    ? `/produto/${slug}?pid=${nuvemshopId}`                       // inclui ID da Nuvemshop para o checkout
+    : `/produto/${slug}`
 
   return (
 
@@ -10,7 +14,7 @@ function ProductCard({ nome, imagem, slug }) {                  // recebe propri
 
       <h3>{nome}</h3>                                            {/* nome do produto */}
 
-      <Link to={`/produto/${slug}`}>                             {/* cria link para página dinâmica */}
+      <Link to={linkTo}>                                         {/* cria link para página dinâmica */}
 
         <button>Personalizar</button>                            {/* botão que leva para página do produto */}
 

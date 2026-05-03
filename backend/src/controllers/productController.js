@@ -98,56 +98,51 @@ export const listarProdutosPublicos = async (req, res) => {
 // FUNÇÃO: Gerar link de checkout da loja
 // ======================================================
 // POST /api/public/checkout-link
-// Body: { productSlug, customizacao, storeId? }
+// Body: { nuvemshopProductId, customizacao, storeId? }
+// Cria um pedido rascunho na Nuvemshop com a armação selecionada
+// e as lentes escolhidas como observação do pedido.
 
 export const gerarCheckoutLinkPublico = async (req, res) => {
   try {
-    const { productSlug, customizacao, storeId } = req.body || {}
+    const { customizacao, storeId, nuvemshopProductId, contato } = req.body || {}
 
-    if (!productSlug) {
+    if (!nuvemshopProductId) {
       return res.status(400).json({
         erro: "Parâmetro obrigatório",
-        mensagem: "Informe productSlug",
+        mensagem: "Informe nuvemshopProductId (ID do produto na Nuvemshop)",
       })
     }
 
     const internalStoreId = await resolvePublicStoreId(storeId)
-    const storeBaseUrl = (process.env.STORE_PUBLIC_URL || "").trim().replace(/\/+$/, "")
 
-    if (!storeBaseUrl) {
-      return res.status(400).json({
-        erro: "STORE_PUBLIC_URL não configurada",
-        mensagem: "Configure STORE_PUBLIC_URL no backend/.env com a URL pública da loja Nuvemshop",
-      })
+    // Montar texto de observação com todas as escolhas do cliente
+    const linhas = []
+    if (customizacao?.tipoArmacao) linhas.push(`Tipo de armação: ${customizacao.tipoArmacao}`)
+    if (customizacao?.corArmacao)  linhas.push(`Cor da armação: ${customizacao.corArmacao}`)
+    if (customizacao?.lentes?.length > 0) {
+      linhas.push(`Lentes escolhidas: ${customizacao.lentes.join(", ")}`)
     }
+    const observacoes = linhas.join(" | ")
 
-    const query = new URLSearchParams({
-      utm_source: "customglass",
-      utm_medium: "personalizador",
-      utm_campaign: "checkout_custom",
-    })
+    console.log(`📝 Observações do pedido: "${observacoes}"`)
 
-    if (customizacao) {
-      query.set("custom", JSON.stringify(customizacao))
-    }
-
-    const checkoutPath = (process.env.STORE_CHECKOUT_PATH || "/comprar/").trim()
-    const normalizedCheckoutPath = checkoutPath.startsWith("/")
-      ? checkoutPath
-      : `/${checkoutPath}`
-
-    const checkoutUrl = `${storeBaseUrl}${normalizedCheckoutPath}?${query.toString()}`
+    const { checkoutUrl } = await NuvemshopService.criarPedidoPersonalizado(
+      internalStoreId,
+      nuvemshopProductId,
+      observacoes,
+      contato
+    )
 
     res.json({
-      mensagem: "Link de checkout gerado",
+      mensagem: "URL de checkout gerada com sucesso",
       storeId: internalStoreId,
       checkoutUrl,
     })
   } catch (error) {
-    console.error("❌ Erro ao gerar link de checkout:", error.message)
+    console.error("❌ Erro ao gerar checkout personalizado:", error.message)
 
     res.status(500).json({
-      erro: "Erro ao gerar link de checkout",
+      erro: "Erro ao criar pedido na loja",
       mensagem: error.message,
     })
   }

@@ -279,3 +279,72 @@ export const getStoreInfo = async (storeId) => {
     throw error
   }
 }
+
+// ======================================================
+// FUNÇÃO: Criar Draft Order Personalizado
+// ======================================================
+// Usa POST /draft_orders da API Nuvemshop, que retorna um
+// checkout_url real e funcional. O cliente acessa esse link
+// e preenche endereço/pagamento para finalizar o pedido.
+//
+// As lentes escolhidas são registradas em dois lugares:
+//  - note: visível nas observações do pedido no painel
+//  - properties do produto: aparece no item do pedido
+//
+// Retorna: { checkoutUrl }
+
+export const criarPedidoPersonalizado = async (storeId, nuvemshopProductId, observacoes, contato) => {
+  try {
+    console.log(`🛒 Criando draft order - produto ${nuvemshopProductId}, loja ${storeId}...`)
+
+    const accessToken = await AuthService.getAccessTokenForStore(storeId)
+    const store = await StoreModel.getStoreById(storeId)
+    const client = createNuvemshopClient(store.nuvemshop_store_id, accessToken)
+
+    // Buscar produto para obter variant_id
+    console.log(`🔍 Buscando variante do produto ${nuvemshopProductId}...`)
+    const productResponse = await client.get(`/products/${nuvemshopProductId}`)
+    const product = productResponse.data
+
+    const variantId = product.variants?.[0]?.id
+    if (!variantId) {
+      throw new Error("Produto não possui variantes disponíveis")
+    }
+    console.log(`✅ Variante encontrada: ${variantId}`)
+
+    // Criar draft order — a API retorna checkout_url pronto para uso
+    const draftOrderData = {
+      contact_name: contato?.nome || "",
+      contact_lastname: contato?.sobrenome || "",
+      contact_email: contato?.email || "",
+      payment_status: "unpaid",
+      note: observacoes,
+      products: [
+        {
+          variant_id: variantId,
+          quantity: 1,
+        },
+      ],
+    }
+
+    console.log(`📝 Criando draft order com observação: "${observacoes}"`)
+    const draftResponse = await client.post("/draft_orders", draftOrderData)
+    const draft = draftResponse.data
+
+    const checkoutUrl = draft.checkout_url
+    if (!checkoutUrl) {
+      throw new Error("API não retornou checkout_url no draft order")
+    }
+
+    console.log(`✅ Draft order criado: ID ${draft.id}`)
+    console.log(`🔗 URL de checkout: ${checkoutUrl}`)
+
+    return { checkoutUrl }
+  } catch (error) {
+    console.error("❌ Erro ao criar draft order personalizado:")
+    console.error("   Status:", error.response?.status)
+    console.error("   Dados:", JSON.stringify(error.response?.data))
+    console.error("   Mensagem:", error.message)
+    throw error
+  }
+}
