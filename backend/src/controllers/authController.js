@@ -12,6 +12,60 @@ import * as AuthService from "../services/auth.service.js"
 import * as StoreModel from "../models/store.model.js"
 
 // ======================================================
+// LOGIN DO LOJISTA
+// ======================================================
+// POST /auth/lojista/login
+// Body: { email, senha }
+
+export const loginLojista = async (req, res) => {
+  try {
+    const { email, senha } = req.body || {}
+
+    if (!email || !senha) {
+      return res.status(400).json({ erro: "Email e senha são obrigatórios" })
+    }
+
+    const { token, nome, userId } = await AuthService.loginLojista(email, senha)
+
+    return res.json({ token, nome, userId })
+  } catch (error) {
+    return res.status(401).json({ erro: error.message })
+  }
+}
+
+// ======================================================
+// CRIAR LOJISTA (uso interno / primeiro setup)
+// ======================================================
+// POST /auth/lojista/criar
+// Body: { nome, email, senha, adminSecret }
+
+export const criarLojista = async (req, res) => {
+  try {
+    const { nome, email, senha, adminSecret } = req.body || {}
+
+    if (adminSecret !== process.env.ADMIN_SECRET) {
+      return res.status(403).json({ erro: "Não autorizado" })
+    }
+
+    if (!nome || !email || !senha) {
+      return res.status(400).json({ erro: "nome, email e senha são obrigatórios" })
+    }
+
+    if (senha.length < 8) {
+      return res.status(400).json({ erro: "A senha deve ter no mínimo 8 caracteres" })
+    }
+
+    const user = await AuthService.criarLojista(nome, email, senha)
+    return res.status(201).json({ mensagem: "Lojista criado com sucesso", user })
+  } catch (error) {
+    if (error.code === "23505") {
+      return res.status(409).json({ erro: "Este email já está cadastrado" })
+    }
+    return res.status(500).json({ erro: error.message })
+  }
+}
+
+// ======================================================
 // ETAPA 1: Iniciar Fluxo OAuth
 // ======================================================
 // Rota: GET /auth/nuvemshop

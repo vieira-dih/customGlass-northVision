@@ -14,7 +14,9 @@
 
 import axios from "axios"
 import jwt from "jsonwebtoken"
+import bcrypt from "bcryptjs"
 import * as StoreModel from "../models/store.model.js"
+import { query } from "../config/database.js"
 import dotenv from "dotenv"
 
 dotenv.config()
@@ -414,4 +416,42 @@ export const validateTokenWithAPI = async (storeId, accessToken) => {
       error: error.message,
     }
   }
+}
+
+// ======================================================
+// LOGIN DO LOJISTA: Autenticar com email + senha
+// ======================================================
+export const loginLojista = async (email, senha) => {
+  const result = await query(
+    "SELECT id, nome, email, password_hash FROM users WHERE email = $1 LIMIT 1",
+    [email.toLowerCase().trim()]
+  )
+
+  const user = result.rows[0]
+  if (!user) throw new Error("Credenciais inválidas")
+
+  const senhaCorreta = await bcrypt.compare(senha, user.password_hash)
+  if (!senhaCorreta) throw new Error("Credenciais inválidas")
+
+  const token = jwt.sign(
+    { userId: user.id, role: "lojista" },
+    process.env.JWT_SECRET,
+    { expiresIn: "8h", algorithm: "HS256" }
+  )
+
+  return { token, nome: user.nome, userId: user.id }
+}
+
+// ======================================================
+// CRIAR LOJISTA: Registrar novo usuário lojista
+// ======================================================
+export const criarLojista = async (nome, email, senha) => {
+  const hash = await bcrypt.hash(senha, 12)
+  const result = await query(
+    `INSERT INTO users (nome, email, password_hash)
+     VALUES ($1, $2, $3)
+     RETURNING id, nome, email`,
+    [nome.trim(), email.toLowerCase().trim(), hash]
+  )
+  return result.rows[0]
 }

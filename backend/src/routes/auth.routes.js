@@ -67,6 +67,20 @@ router.delete("/stores/:storeId", authenticateJWT, AuthController.disconnectStor
 router.post("/test-token", AuthController.testTokenDiagnostic)
 
 // ======================================================
+// ROTAS DO LOJISTA
+// ======================================================
+
+// Rota 8: Login do lojista
+// POST /auth/lojista/login
+// Body: { email, senha }
+router.post("/lojista/login", AuthController.loginLojista)
+
+// Rota 9: Criar lojista (primeiro setup - protegido por adminSecret)
+// POST /auth/lojista/criar
+// Body: { nome, email, senha, adminSecret }
+router.post("/lojista/criar", AuthController.criarLojista)
+
+// ======================================================
 // Exportar router
 // ======================================================
 

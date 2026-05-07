@@ -5,6 +5,7 @@
 // ======================================================
 
 import "../styles/footer.css"
+import { Link } from "react-router-dom"
 
 function Footer(){
 
@@ -13,6 +14,13 @@ function Footer(){
     <footer className="footer">
 
       <p>© North Vision</p>
+
+      <Link
+        to="/lojista/login"
+        style={{ color: "#555", fontSize: "11px", textDecoration: "none", marginTop: "6px", display: "inline-block" }}
+      >
+        Área do lojista
+      </Link>
 
     </footer>
 
