@@ -130,7 +130,8 @@ export const gerarCheckoutLinkPublico = async (req, res) => {
       internalStoreId,
       nuvemshopProductId,
       observacoes,
-      contato
+      contato,
+      customizacao
     )
 
     res.json({

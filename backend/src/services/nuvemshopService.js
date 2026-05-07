@@ -293,7 +293,7 @@ export const getStoreInfo = async (storeId) => {
 //
 // Retorna: { checkoutUrl }
 
-export const criarPedidoPersonalizado = async (storeId, nuvemshopProductId, observacoes, contato) => {
+export const criarPedidoPersonalizado = async (storeId, nuvemshopProductId, observacoes, contato, customizacao) => {
   try {
     console.log(`🛒 Criando draft order - produto ${nuvemshopProductId}, loja ${storeId}...`)
 
@@ -312,6 +312,21 @@ export const criarPedidoPersonalizado = async (storeId, nuvemshopProductId, obse
     }
     console.log(`✅ Variante encontrada: ${variantId}`)
 
+    // Montar properties do item como objeto simples {chave: valor}
+    // A Nuvemshop exibe cada entrada diretamente no checkout ao lado do produto
+    const itemProperties = {}
+    if (customizacao?.tipoArmacao) {
+      itemProperties["Armação"] = String(customizacao.tipoArmacao)
+    }
+    if (customizacao?.corArmacao) {
+      itemProperties["Cor da armação"] = String(customizacao.corArmacao)
+    }
+    if (customizacao?.lentes?.length > 0) {
+      customizacao.lentes.forEach((lente, i) => {
+        itemProperties[`Lente ${i + 1}`] = String(lente)
+      })
+    }
+
     // Criar draft order — a API retorna checkout_url pronto para uso
     const draftOrderData = {
       contact_name: contato?.nome || "",
@@ -323,6 +338,7 @@ export const criarPedidoPersonalizado = async (storeId, nuvemshopProductId, obse
         {
           variant_id: variantId,
           quantity: 1,
+          properties: itemProperties,
         },
       ],
     }

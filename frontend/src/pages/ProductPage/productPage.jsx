@@ -44,7 +44,7 @@ function ProductPage() {
   const nuvemshopProductId = searchParams.get("pid")
   const produto = products.find(p => p.slug === slug)
 
-  const produtoNome = produto?.nome || slug.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase())
+  const produtoNome = produto?.nome || searchParams.get("nome") || slug.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase())
 
   // --- ESTADOS ---
   const [lentesSelecionadas, setLentesSelecionadas] = useState([])

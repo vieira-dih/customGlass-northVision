@@ -18,13 +18,15 @@ function Home() {
         const dados = await buscarProdutosPublicos()
         
         // Transforma os dados da API para o formato esperado
-        const produtosFormatados = (Array.isArray(dados) ? dados : []).map((produto) => ({
-          id: produto.id,
-          nuvemshopId: produto.id,
-          nome: produto.name?.pt || produto.name || 'Sem nome',
-          imagem: produto.images?.[0]?.src || produto.image?.src || banner,
-          slug: produto.handle?.pt || produto.handle || produto.name?.pt?.toLowerCase().replace(/\s+/g, "-") || `produto-${produto.id}`
-        }))
+        const produtosFormatados = (Array.isArray(dados) ? dados : [])
+          .map((produto) => ({
+            id: produto.id,
+            nuvemshopId: produto.id,
+            nome: produto.name?.pt || produto.name || 'Sem nome',
+            imagem: produto.images?.[0]?.src || produto.image?.src || banner,
+            slug: produto.handle?.pt || produto.handle || produto.name?.pt?.toLowerCase().replace(/\s+/g, "-") || `produto-${produto.id}`
+          }))
+          .filter((produto) => produto.nome.toLowerCase().startsWith("kit"))
         
         setProdutos(produtosFormatados)
         setErro(null)

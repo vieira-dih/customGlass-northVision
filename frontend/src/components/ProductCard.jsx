@@ -2,9 +2,10 @@ import { Link } from "react-router-dom"                         // Link permite 
 
 function ProductCard({ nome, imagem, slug, nuvemshopId }) {     // recebe propriedades do produto
 
+  const nomeEncoded = encodeURIComponent(nome || "")
   const linkTo = nuvemshopId
-    ? `/produto/${slug}?pid=${nuvemshopId}`                       // inclui ID da Nuvemshop para o checkout
-    : `/produto/${slug}`
+    ? `/produto/${slug}?pid=${nuvemshopId}&nome=${nomeEncoded}`
+    : `/produto/${slug}?nome=${nomeEncoded}`
 
   return (
 
