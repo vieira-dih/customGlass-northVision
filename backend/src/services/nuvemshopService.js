@@ -66,18 +66,26 @@ export const getProducts = async (storeId) => {
     // Passo 3: Criar cliente Axios com token
     const client = createNuvemshopClient(store.nuvemshop_store_id, accessToken)
     
-    // Passo 4: Fazer requisição GET /products com parametrizações
-    try {
-      const response = await client.get("/products?limit=100")
-      console.log(`✅ ${response.data.length} produto(s) encontrado(s)`)
-      return response.data
-    } catch (innerError) {
-      // Se falhar com query params, tenta sem eles
-      console.log("⚠️ Tentando sem parametrizações...")
-      const response = await client.get("/products")
-      console.log(`✅ ${response.data.length} produto(s) encontrado(s)`)
-      return response.data
+    // Passo 4: Buscar todos os produtos paginando (parâmetro correto Nuvemshop: per_page)
+    let todosProdutos = []
+    let pagina = 1
+    let continuarBuscando = true
+
+    while (continuarBuscando) {
+      const response = await client.get(`/products?per_page=200&page=${pagina}`) // per_page é o param correto da API Nuvemshop
+      const lote = response.data
+
+      todosProdutos = todosProdutos.concat(lote)                              // acumula todos os produtos
+      console.log(`✅ Página ${pagina}: ${lote.length} produto(s) — total acumulado: ${todosProdutos.length}`)
+
+      if (lote.length < 200) {
+        continuarBuscando = false                                              // última página, para o loop
+      } else {
+        pagina++                                                               // vai para próxima página
+      }
     }
+
+    return todosProdutos
   } catch (error) {
     console.error("❌ Erro ao buscar produtos:")
     console.error("   Status:", error.response?.status)
