@@ -1,39 +1,48 @@
+/* WRAPPER: garante footer sempre no final da página */
+.page-wrapper{
+  min-height: 100vh;                    /* ocupa altura total da tela */
+  display: flex;                        /* ativa layout em coluna */
+  flex-direction: column;               /* empilha header, conteúdo e footer */
+}
+
 .custom-container{
   display: flex;                        /* layout lado a lado */
-  justify-content: center;              /* centraliza horizontal */
+  justify-content: flex-start;          /* alinha conteúdo a partir da esquerda */
   align-items: flex-start;              /* alinha topo */
-  gap: 60px;                            /* espaço entre colunas */
+  gap: 5%;                              /* espaço proporcional entre colunas */
 
-  max-width: 1200px;                    /* largura máxima */
+  width: 90%;                           /* ocupa 90% da tela em qualquer monitor */
+  max-width: 1400px;                    /* limite para telas muito grandes */
   margin: 60px auto;                    /* centraliza na tela */
   padding: 20px;                        /* espaço interno */
+  flex: 1;                              /* empurra o footer para o final */
 }
 
 /* 🔎 PREVIEW */
 
 .custom-left{
-  flex: 1;                              /* ocupa metade */
+  flex: 2;                              /* coluna menor — ocupa 2/5 do espaço */
   position: sticky;                     /* fixa ao rolar */
   top: 100px;                           /* distância do topo */
   text-align: center;                   /* centraliza imagem */
 }
 
 .custom-glasses{
-  max-width: 420px;                     /* tamanho máximo */
+  max-width: 100%;                      /* ocupa toda a coluna */
   width: 100%;                          /* responsivo */
 }
 
 /* ⚙️ CONFIG */
 
 .custom-right{
-  flex: 1;                              /* ocupa metade */
+  flex: 3;                              /* coluna maior — ocupa 3/5 do espaço */
   display: flex;
   flex-direction: column;
   gap: 25px;                            /* espaço entre seções */
 }
 
 .custom-right h1{
-  font-size: 28px;                      /* título do produto */
+  font-size: clamp(20px, 2vw, 32px);    /* escala suave entre telas */
 }
 
 /* 📦 SECTIONS */
@@ -223,15 +232,17 @@
 
 @media (max-width: 900px){
   .custom-container{
-    flex-direction: row;             /* empilha */
+    flex-direction: column;          /* empilha em telas pequenas */
+    width: 95%;                      /* mais espaço lateral no mobile */
   }
 
   .custom-left{
-    position: static;                  /* remove fixo */
+    position: static;                  /* remove sticky no mobile */
   }
 
   .custom-glasses{
-    max-width: 250px;                  /* menor */
+    max-width: 280px;                  /* tamanho adequado no mobile */
+    margin: 0 auto;                    /* centraliza */
   }
 }
 

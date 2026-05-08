@@ -124,7 +124,7 @@ function ProductPage() {
   }
 
   return (
-    <>
+    <div className="page-wrapper">
       <Header />
 
       <div className="custom-container">
@@ -234,7 +234,7 @@ function ProductPage() {
       )}
 
       <Footer />
-    </>
+    </div>
   )
 }
 
