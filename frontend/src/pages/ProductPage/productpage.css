@@ -9,7 +9,7 @@
   display: flex;                        /* layout lado a lado */
   justify-content: flex-start;          /* alinha conteúdo a partir da esquerda */
   align-items: flex-start;              /* alinha topo */
-  gap: 5%;                              /* espaço proporcional entre colunas */
+  gap: 3%;                              /* espaço proporcional entre colunas */
 
   width: 90%;                           /* ocupa 90% da tela em qualquer monitor */
   max-width: 1400px;                    /* limite para telas muito grandes */
@@ -35,7 +35,7 @@
 /* ⚙️ CONFIG */
 
 .custom-right{
-  flex: 3;                              /* coluna maior — ocupa 3/5 do espaço */
+  flex: 4;                              /* coluna maior — ocupa 4/6 do espaço */
   display: flex;
   flex-direction: column;
   gap: 25px;                            /* espaço entre seções */
@@ -134,15 +134,17 @@
 
 .tooltip{
   position: absolute;
-  bottom: -30px;                        /* aparece abaixo */
-  left: 50%;
-  transform: translateX(-50%);
+  left: calc(100% + 10px);             /* aparece à direita do botão */
+  top: 50%;
+  transform: translateY(-50%);          /* centraliza verticalmente */
 
-  background: black;
+  background: #111;
   color: white;
-  font-size: 12px;
-  padding: 4px 8px;
-  border-radius: 5px;
+  font-size: 14px;                      /* fonte maior */
+  font-weight: 600;                     /* negrito */
+  padding: 7px 14px;                    /* mais espaço interno */
+  border-radius: 7px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.25); /* sombra para destacar */
 
   white-space: nowrap;
   opacity: 0;                           /* escondido */
@@ -153,7 +155,8 @@
 
 /* mostra tooltip no hover */
 
-.cores button:hover .tooltip{
+.cores button:hover .tooltip,
+.lens-options button:hover .tooltip{     /* ativa tooltip em lentes e cores */
   opacity: 1;
 }
 
@@ -166,13 +169,14 @@
 }
 
 .lens-options button{
-  width: 70px;
-  height: 50px;
+  width: 90px;
+  height: 65px;
   border-radius: 8px;
   border: 2px solid #ccc;
-  overflow: hidden;
+  overflow: visible;                     /* permite tooltip aparecer fora do botão */
   cursor: pointer;
   padding: 0;
+  position: relative;                    /* necessário para posicionar o tooltip */
   transition: 0.2s;
 }
 

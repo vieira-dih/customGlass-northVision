@@ -18,6 +18,7 @@ import lensRoxa from "../../assets/glasses/radar-ev/curvo/lens-roxa.png"
 import lensVermelha from "../../assets/glasses/radar-ev/curvo/lens-vermelha.png"
 import lensTransparente from "../../assets/glasses/radar-ev/curvo/lens-transparente.png"
 import lensVerde from "../../assets/glasses/radar-ev/curvo/lens-verde.png"
+import lensObsidian from "../../assets/glasses/radar-ev/curvo/lens-obsidian.png"
 
 import "./productPage.css"
 
@@ -33,6 +34,7 @@ const LENTES_DISPONIVEIS = [
   { nome: "Roxa",         img: lensRoxa         },
   { nome: "Transparente", img: lensTransparente },
   { nome: "Verde",        img: lensVerde        },
+  { nome: "Obsidian",     img: lensObsidian     },
 ]
 
 const MAX_LENTES = 5
@@ -150,9 +152,11 @@ function ProductPage() {
                     key={index}
                     className={selecionada ? "ativo" : ""}
                     onClick={() => toggleLente(lente)}
-                    title={lente.nome}
+                    onMouseEnter={() => setPreview(lente.img)}
+                    onMouseLeave={() => setPreview(lentesSelecionadas.length > 0 ? lentesSelecionadas[lentesSelecionadas.length - 1].img : lensPreta)}
                   >
                     <img src={lente.img} alt={lente.nome} />
+                    <span className="tooltip">{lente.nome}</span>
                   </button>
                 )
               })}
