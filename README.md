@@ -146,14 +146,15 @@ FRONTEND_URL=http://localhost:5173
 
 Se você ainda não tem um app criado na Nuvemshop:
 
-1. Acesse **https://www.nuvemshop.com.br/admin/apps**
-2. Clique em **"Criar aplicativo"**
-3. Preencha nome e descrição
-4. Em **"URLs de redirecionamento"**, adicione exatamente:
+1. Acesse **https://partners.nuvemshop.com.br**
+2. crie sua conta 
+3. Clique em **"Criar aplicativo"**
+4. Preencha nome e descrição
+5. Em **"URLs de redirecionamento"**, adicione exatamente:
    ```
    http://localhost:3000/auth/callback
    ```
-5. Salve e copie o **Client ID** e **Client Secret** para o `.env`
+6. Salve e copie o **Client ID** e **Client Secret** para o `.env`
 
 ---
 
