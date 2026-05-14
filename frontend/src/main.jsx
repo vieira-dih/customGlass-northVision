@@ -2,7 +2,7 @@
 // Arquivo: main.jsx
 // ======================================================
 // Ponto de entrada do frontend React.
-// Aqui a aplicacao eh montada no elemento #root do index.html.
+// Aqui a aplicacao é montada no elemento #root do index.html.
 // ======================================================
 
 import { StrictMode } from "react";
