@@ -18,13 +18,13 @@ function Home() {
 
                 // Nomes exatos dos 7 produtos que devem aparecer no catálogo
         const PRODUTOS_PERMITIDOS = [
-          "kit radar ev 5 lentes brilho curvo",
-          "kit radar ev 5 lentes transparente brilho curvo",
-          "radar ev bege kit 5 lentes brilho curvo",
-          "kit radar ev 5 lentes - branca brilho curvo",
-          "kit radar ev 5 lentes - cinza brilho curvo",
-          "kit 5 lentes - radar ev marrom - brilho curvo",
-          "kit 5 lentes - radar ev transparente fosco - brilho curvo -",
+          "kit radar ev 5 lentes brilho curvo - marrom",
+          "kit radar ev 5 lentes brilho curvo - branca",
+          "kit radar ev 5 lentes brilho curvo - cinza",
+          "kit radar ev 5 lentes brilho curvo - preta",
+          "kit radar ev 5 lentes brilho curvo - transparente",
+          "kit radar ev 5 lentes brilho curvo - bege",
+          "kit radar ev 5 lentes brilho curvo - transparente fosco",
         ]
 
         // Transforma os dados da API para o formato esperado
