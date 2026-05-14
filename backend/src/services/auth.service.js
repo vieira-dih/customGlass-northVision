@@ -65,10 +65,6 @@ export const generateAuthorizationUrl = () => {
     const authUrl = `${NUVEMSHOP_AUTHORIZE_BASE}/${clientId}/authorize?${params.toString()}`
     
     console.log("✅ URL de autorização gerada")
-    console.log("📍 CLIENT_ID:", process.env.NUVEMSHOP_CLIENT_ID)
-    console.log("📍 REDIRECT_URI:", process.env.NUVEMSHOP_REDIRECT_URI)
-    console.log("📍 STATE:", state)
-    console.log("📍 URL Completa:", authUrl)
     
     return { url: authUrl, state }
   } catch (error) {
@@ -122,8 +118,6 @@ export const exchangeCodeForToken = async (code) => {
     } = response.data
     
     console.log("✅ Token recebido do Nuvemshop")
-    console.log("   Store ID:", store_id)
-    console.log("   User ID:", user_id)
     
     // Se store_id não veio na resposta, buscar da API
     let finalStoreId = store_id
@@ -145,8 +139,7 @@ export const exchangeCodeForToken = async (code) => {
         )
         
         finalStoreId = storeResponse.data.id
-        console.log("✅ Store ID obtido da API:", finalStoreId)
-        console.log("   Store name:", storeResponse.data.name)
+        console.log("✅ Store ID obtido da API")
       } catch (apiError) {
         console.error("❌ GET /v1/store retornou:", {
           status: apiError.response?.status,
@@ -156,8 +149,7 @@ export const exchangeCodeForToken = async (code) => {
         
         // Fallback: se API falhar, tentar usar user_id como store_id
         finalStoreId = user_id
-        console.log("⚠️ Usando user_id como store_id:", finalStoreId)
-        console.log("⚠️ NOTA: Verificar se este é o store_id correto no Nuvemshop Dashboard")
+        console.log("⚠️ Fallback: usando user_id como store_id")
       }
     }
     
@@ -292,7 +284,7 @@ export const getAccessTokenForStore = async (storeId) => {
       throw new Error(`Loja com ID ${storeId} não encontrada`)
     }
     
-    console.log("✅ Access token recuperado do banco")
+    console.log("✅ Token recuperado do banco")
     return store.nuvemshop_access_token
   } catch (error) {
     console.error("❌ Erro ao buscar access token:", error.message)
@@ -308,8 +300,6 @@ export const getAccessTokenForStore = async (storeId) => {
 export const validateTokenWithAPI = async (storeId, accessToken) => {
   try {
     console.log("🔄 Validando token com API Nuvemshop...")
-    console.log("   Store ID:", storeId)
-    console.log("   Token (primeiros 20 chars):", accessToken.substring(0, 20) + "...")
     
     // TESTE 1: GET /v1/{storeId}/store - Formato correto da API Nuvemshop
     console.log("\n   📌 TESTE 1: GET /v1/{storeId}/store")

@@ -3,9 +3,18 @@ import { useNavigate } from "react-router-dom"
 
 function LojistaLogin() {
   const [modo, setModo] = useState("login") // "login" | "cadastro"
-  const [form, setForm] = useState({ nome: "", email: "", senha: "", chave: "" })
+  const [form, setForm] = useState({ nome: "", email: "", senha: "", confirmarSenha: "", chave: "" })
   const [erro, setErro] = useState("")
   const [carregando, setCarregando] = useState(false)
+
+  const validarSenha = (senha) => {
+    const erros = []
+    if (senha.length < 8)            erros.push("mínimo 8 caracteres")
+    if (!/[A-Z]/.test(senha))        erros.push("1 letra maiúscula")
+    if (!/[0-9]/.test(senha))        erros.push("1 número")
+    if (!/[^A-Za-z0-9]/.test(senha)) erros.push("1 caractere especial (!@#$%...")
+    return erros
+  }
   const navigate = useNavigate()
 
   const set = (campo) => (e) => setForm({ ...form, [campo]: e.target.value })
@@ -35,7 +44,9 @@ function LojistaLogin() {
   const handleCadastro = async (e) => {
     e.preventDefault()
     setErro("")
-    if (form.senha.length < 8) { setErro("A senha deve ter no mínimo 8 caracteres"); return }
+    const errosSenha = validarSenha(form.senha)
+    if (errosSenha.length > 0) { setErro("A senha precisa ter: " + errosSenha.join(", ")); return }
+    if (form.senha !== form.confirmarSenha) { setErro("As senhas não coincidem"); return }
     if (!form.chave.trim()) { setErro("Informe a chave de registro"); return }
     setCarregando(true)
     try {
@@ -70,7 +81,7 @@ function LojistaLogin() {
 
   const trocarModo = (novoModo) => {
     setErro("")
-    setForm({ nome: "", email: "", senha: "", chave: "" })
+    setForm({ nome: "", email: "", senha: "", confirmarSenha: "", chave: "" })
     setModo(novoModo)
   }
 
@@ -108,7 +119,21 @@ function LojistaLogin() {
           <form onSubmit={handleCadastro} style={styles.form}>
             <Campo label="Nome" type="text" value={form.nome} onChange={set("nome")} autoComplete="name" />
             <Campo label="E-mail" type="email" value={form.email} onChange={set("email")} autoComplete="email" />
-            <Campo label="Senha" type="password" value={form.senha} onChange={set("senha")} autoComplete="new-password" />
+            <Campo
+              label="Senha"
+              type="password"
+              value={form.senha}
+              onChange={set("senha")}
+              autoComplete="new-password"
+              hint="Mínimo 8 caracteres, 1 maiúscula, 1 número e 1 caractere especial"
+            />
+            <Campo
+              label="Confirmar senha"
+              type="password"
+              value={form.confirmarSenha}
+              onChange={set("confirmarSenha")}
+              autoComplete="new-password"
+            />
             <Campo
               label="Chave de registro"
               type="password"

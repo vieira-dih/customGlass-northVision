@@ -43,7 +43,7 @@ export const criarLojista = async (req, res) => {
   try {
     const { nome, email, senha, adminSecret } = req.body || {}
 
-    if (adminSecret !== process.env.ADMIN_SECRET) {
+    if ((adminSecret || "").trim() !== (process.env.ADMIN_SECRET || "").trim()) {
       return res.status(403).json({ erro: "Não autorizado" })
     }
 
@@ -53,6 +53,15 @@ export const criarLojista = async (req, res) => {
 
     if (senha.length < 8) {
       return res.status(400).json({ erro: "A senha deve ter no mínimo 8 caracteres" })
+    }
+    if (!/[A-Z]/.test(senha)) {
+      return res.status(400).json({ erro: "A senha deve conter pelo menos 1 letra maiúscula" })
+    }
+    if (!/[0-9]/.test(senha)) {
+      return res.status(400).json({ erro: "A senha deve conter pelo menos 1 número" })
+    }
+    if (!/[^A-Za-z0-9]/.test(senha)) {
+      return res.status(400).json({ erro: "A senha deve conter pelo menos 1 caractere especial (!@#$%...)" })
     }
 
     const user = await AuthService.criarLojista(nome, email, senha)
@@ -85,7 +94,6 @@ export const initiateOAuth = (req, res) => {
     req.session.oauthState = state
     
     console.log("🔄 Redirecionando para Nuvemshop...")
-    console.log("   URL:", authUrl)
     
     // Redirecionar o usuário para o Nuvemshop
     // Lá ele verá um botão "Autorizar" para sua loja
@@ -126,8 +134,7 @@ export const handleOAuthCallback = async (req, res) => {
       })
     }
     
-    console.log("✅ Code recebido:", code.substring(0, 10) + "...")
-    console.log("✅ Store ID recebido:", store_id)
+    console.log("✅ Code recebido da Nuvemshop")
     
     // POR ENQUANTO: Usar um user_id padrão
     // DEPOIS: Implementar sistema de usuários com login/JWT separado
@@ -209,14 +216,24 @@ export const verifyToken = async (req, res) => {
     const { userId, storeId } = req.user
     
     console.log("🔍 Verificando token para usuário:", userId)
+
+    // Token de lojista (login email/senha) não tem storeId — retorna OK sem loja
+    if (!storeId) {
+      return res.json({
+        mensagem: "Token válido",
+        usuario: { id: userId },
+        loja: null,
+      })
+    }
     
     // Buscar informações da loja no banco
     const store = await StoreModel.getStoreById(storeId)
     
     if (!store) {
-      return res.status(404).json({
-        erro: "Loja não encontrada",
-        mensagem: "A loja associada a este token não existe mais",
+      return res.json({
+        mensagem: "Token válido",
+        usuario: { id: userId },
+        loja: null,
       })
     }
     
@@ -390,8 +407,6 @@ export const testTokenDiagnostic = async (req, res) => {
     }
     
     console.log("🔧 DIAGNÓSTICO: Testando token e store_id...")
-    console.log("   StoreId recebido:", storeId)
-    console.log("   Token:", accessToken.substring(0, 20) + "...")
     
     // Chamar função de validação completa
     const validation = await AuthService.validateTokenWithAPI(storeId, accessToken)

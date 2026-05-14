@@ -57,7 +57,7 @@ export const getProducts = async (storeId) => {
     
     // Passo 1: Buscar access token do banco
     const accessToken = await AuthService.getAccessTokenForStore(storeId)
-    console.log(`🔑 Token recuperado (primeiros 20 chars):`, accessToken.substring(0, 20) + "...")
+    console.log(`🔑 Token recuperado do banco`)
     
     // Passo 2: Obter store_id da Nuvemshop
     const store = await StoreModel.getStoreById(storeId)
@@ -184,7 +184,7 @@ export const getCategories = async (storeId) => {
 
 export const getCustomerByEmail = async (storeId, email) => {
   try {
-    console.log(`🔍 Buscando cliente com email ${email}...`)
+    console.log(`🔍 Buscando cliente na loja...`)
     
     const accessToken = await AuthService.getAccessTokenForStore(storeId)
     const store = await StoreModel.getStoreById(storeId)
@@ -218,7 +218,7 @@ export const getCustomerByEmail = async (storeId, email) => {
 
 export const createCustomer = async (storeId, customerData) => {
   try {
-    console.log(`👤 Criando cliente ${customerData.email}...`)
+    console.log(`👤 Criando cliente na loja...`)
     
     const accessToken = await AuthService.getAccessTokenForStore(storeId)
     const store = await StoreModel.getStoreById(storeId)
