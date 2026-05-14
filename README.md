@@ -146,14 +146,16 @@ FRONTEND_URL=http://localhost:5173
 
 Se você ainda não tem um app criado na Nuvemshop:
 
-1. Acesse **https://www.nuvemshop.com.br/admin/apps**
-2. Clique em **"Criar aplicativo"**
-3. Preencha nome e descrição
-4. Em **"URLs de redirecionamento"**, adicione exatamente:
+1. Acesse **https://partners.nuvemshop.com.br**
+2. crie sua conta 
+3. Clique em **"Criar aplicativo"**
+4. Preencha nome e descrição
+5. conecte esse app com uma loja na nuvemshop (pode criar uma demo para testes)
+6. Em **"URLs de redirecionamento"**, adicione exatamente:
    ```
    http://localhost:3000/auth/callback
    ```
-5. Salve e copie o **Client ID** e **Client Secret** para o `.env`
+7. Salve e copie o **Client ID** e **Client Secret** para o `.env`
 
 ---
 
@@ -239,7 +241,7 @@ Acesse **http://localhost:5173** no navegador.
 
 ## 8. Fluxo de autenticação OAuth
 
-1. Na interface, clique em **"Instalar aplicativo"**
+1. Na interface, clique em **"Instalar aplicativo"**( para isso o dono da loja tem que estar logado na nuvemshop já)
 2. Você será redirecionado para a Nuvemshop para autorizar o app
 3. Após autorizar, a Nuvemshop redireciona para `http://localhost:3000/auth/callback`
 4. O backend troca o `code` por um `access_token` e emite um **JWT**
