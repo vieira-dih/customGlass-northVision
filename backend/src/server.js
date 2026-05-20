@@ -16,8 +16,8 @@ import { testConnection } from "./config/database.js"
 import productRoutes from "./routes/productRoutes.js"
 import authRoutes from "./routes/auth.routes.js"
 
-// Carregar variáveis de ambiente
-dotenv.config()
+// Carregar variáveis de ambiente (da raiz do projeto)
+dotenv.config({ path: '../.env' })
 
 // ======================================================
 // CRIAR APLICAÇÃO EXPRESS
@@ -25,16 +25,17 @@ dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 3000
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173"
 
 // ======================================================
 // CONFIGURAR MIDDLEWARES GLOBAIS
 // ======================================================
 
 // Middleware 1: CORS
-// Permite requisições do frontend (localhost:5173)
+// Permite requisições do frontend
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:3000"],
+    origin: FRONTEND_URL,
     credentials: true,
   })
 )

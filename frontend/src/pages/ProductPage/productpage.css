@@ -1,39 +1,48 @@
+/* WRAPPER: garante footer sempre no final da página */
+.page-wrapper{
+  min-height: 100vh;                    /* ocupa altura total da tela */
+  display: flex;                        /* ativa layout em coluna */
+  flex-direction: column;               /* empilha header, conteúdo e footer */
+}
+
 .custom-container{
   display: flex;                        /* layout lado a lado */
-  justify-content: center;              /* centraliza horizontal */
+  justify-content: flex-start;          /* alinha conteúdo a partir da esquerda */
   align-items: flex-start;              /* alinha topo */
-  gap: 60px;                            /* espaço entre colunas */
+  gap: 3%;                              /* espaço proporcional entre colunas */
 
-  max-width: 1200px;                    /* largura máxima */
+  width: 90%;                           /* ocupa 90% da tela em qualquer monitor */
+  max-width: 1400px;                    /* limite para telas muito grandes */
   margin: 60px auto;                    /* centraliza na tela */
   padding: 20px;                        /* espaço interno */
+  flex: 1;                              /* empurra o footer para o final */
 }
 
 /* 🔎 PREVIEW */
 
 .custom-left{
-  flex: 1;                              /* ocupa metade */
+  flex: 2;                              /* coluna menor — ocupa 2/5 do espaço */
   position: sticky;                     /* fixa ao rolar */
   top: 100px;                           /* distância do topo */
   text-align: center;                   /* centraliza imagem */
 }
 
 .custom-glasses{
-  max-width: 420px;                     /* tamanho máximo */
+  max-width: 100%;                      /* ocupa toda a coluna */
   width: 100%;                          /* responsivo */
 }
 
 /* ⚙️ CONFIG */
 
 .custom-right{
-  flex: 1;                              /* ocupa metade */
+  flex: 4;                              /* coluna maior — ocupa 4/6 do espaço */
   display: flex;
   flex-direction: column;
   gap: 25px;                            /* espaço entre seções */
 }
 
 .custom-right h1{
-  font-size: 28px;                      /* título do produto */
+  font-size: clamp(20px, 2vw, 32px);    /* escala suave entre telas */
 }
 
 /* 📦 SECTIONS */
@@ -125,15 +134,17 @@
 
 .tooltip{
   position: absolute;
-  bottom: -30px;                        /* aparece abaixo */
-  left: 50%;
-  transform: translateX(-50%);
+  left: calc(100% + 10px);             /* aparece à direita do botão */
+  top: 50%;
+  transform: translateY(-50%);          /* centraliza verticalmente */
 
-  background: black;
+  background: #111;
   color: white;
-  font-size: 12px;
-  padding: 4px 8px;
-  border-radius: 5px;
+  font-size: 14px;                      /* fonte maior */
+  font-weight: 600;                     /* negrito */
+  padding: 7px 14px;                    /* mais espaço interno */
+  border-radius: 7px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.25); /* sombra para destacar */
 
   white-space: nowrap;
   opacity: 0;                           /* escondido */
@@ -144,7 +155,8 @@
 
 /* mostra tooltip no hover */
 
-.cores button:hover .tooltip{
+.cores button:hover .tooltip,
+.lens-options button:hover .tooltip{     /* ativa tooltip em lentes e cores */
   opacity: 1;
 }
 
@@ -157,13 +169,14 @@
 }
 
 .lens-options button{
-  width: 70px;
-  height: 50px;
+  width: 90px;
+  height: 65px;
   border-radius: 8px;
   border: 2px solid #ccc;
-  overflow: hidden;
+  overflow: visible;                     /* permite tooltip aparecer fora do botão */
   cursor: pointer;
   padding: 0;
+  position: relative;                    /* necessário para posicionar o tooltip */
   transition: 0.2s;
 }
 
@@ -211,20 +224,136 @@
   transform: scale(1.02);
 }
 
+.buy-button:disabled{
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 
 
 /* 📱 MOBILE */
 
 @media (max-width: 900px){
   .custom-container{
-    flex-direction: row;             /* empilha */
+    flex-direction: column;          /* empilha em telas pequenas */
+    width: 95%;                      /* mais espaço lateral no mobile */
   }
 
   .custom-left{
-    position: static;                  /* remove fixo */
+    position: static;                  /* remove sticky no mobile */
   }
 
   .custom-glasses{
-    max-width: 250px;                  /* menor */
+    max-width: 280px;                  /* tamanho adequado no mobile */
+    margin: 0 auto;                    /* centraliza */
   }
+}
+
+/* 🗂️ MODAL */
+
+.modal-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-card{
+  background: #fff;
+  border-radius: 16px;
+  padding: 36px 32px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.modal-card h2{
+  font-size: 22px;
+  margin: 0;
+}
+
+.modal-card p{
+  margin: 0;
+  color: #555;
+  font-size: 14px;
+}
+
+.modal-campo{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.modal-campo label{
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.modal-campo input{
+  padding: 11px 14px;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.modal-campo input:focus{
+  border-color: #000;
+}
+
+.modal-erro{
+  color: #e00;
+  font-size: 13px;
+  margin: 0;
+}
+
+.modal-acoes{
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.modal-btn-cancelar{
+  flex: 1;
+  padding: 12px;
+  border: 1.5px solid #ccc;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.modal-btn-cancelar:hover{
+  background: #f5f5f5;
+}
+
+.modal-btn-confirmar{
+  flex: 2;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #000;
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.modal-btn-confirmar:hover{
+  opacity: 0.8;
+}
+
+.modal-btn-confirmar:disabled{
+  opacity: 0.6;
+  cursor: not-allowed;
 }

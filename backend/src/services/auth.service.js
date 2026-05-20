@@ -14,7 +14,9 @@
 
 import axios from "axios"
 import jwt from "jsonwebtoken"
+import bcrypt from "bcryptjs"
 import * as StoreModel from "../models/store.model.js"
+import { query } from "../config/database.js"
 import dotenv from "dotenv"
 
 dotenv.config()
@@ -23,10 +25,11 @@ dotenv.config()
 // CONSTANTES - URLs da Nuvemshop OAuth
 // ======================================================
 
-// URL onde o usuário autoriza a aplicação
-const NUVEMSHOP_AUTHORIZE_URL = "https://www.nuvemshop.com.br/apps/authorize"
+// URL base de autorização - o client_id vai NO PATH, não como query param
+// Formato: https://www.nuvemshop.com.br/apps/{client_id}/authorize
+const NUVEMSHOP_AUTHORIZE_BASE = "https://www.nuvemshop.com.br/apps"
 
-// URL para trocar code por token
+// URL para trocar code por token (com www!)
 const NUVEMSHOP_TOKEN_URL = "https://www.nuvemshop.com.br/apps/authorize/token"
 
 // API base da Nuvemshop para chamadas autenticadas
@@ -40,23 +43,30 @@ const NUVEMSHOP_API_BASE = "https://api.nuvemshop.com.br/v1"
 
 export const generateAuthorizationUrl = () => {
   try {
-    // Construir parâmetros da URL
+    // Gerar um state único para segurança (previne CSRF)
+    // O state será incluído na URL de callback e deve ser verificado
+    const state = Math.random().toString(36).substring(2, 15) + 
+                  Math.random().toString(36).substring(2, 15)
+    
+    // Construir parâmetros da URL (SEM client_id - ele vai no path)
     const params = new URLSearchParams({
-      // ID da aplicação registrada na Nuvemshop
-      client_id: process.env.NUVEMSHOP_CLIENT_ID,
-      
       // Onde retornar após autorização (MUST estar registrado no Nuvemshop)
       redirect_uri: process.env.NUVEMSHOP_REDIRECT_URI,
       
       // Tipo de resposta sempre é 'code' (OAuth 2.0)
       response_type: "code",
+      
+      // State parameter para segurança (CSRF prevention)
+      state: state,
     })
     
-    // Montar URL completa
-    const authUrl = `${NUVEMSHOP_AUTHORIZE_URL}?${params.toString()}`
+    // Montar URL completa: /apps/{client_id}/authorize?params
+    const clientId = process.env.NUVEMSHOP_CLIENT_ID
+    const authUrl = `${NUVEMSHOP_AUTHORIZE_BASE}/${clientId}/authorize?${params.toString()}`
     
     console.log("✅ URL de autorização gerada")
-    return authUrl
+    
+    return { url: authUrl, state }
   } catch (error) {
     console.error("❌ Erro ao gerar URL de autorização:", error)
     throw error
@@ -96,6 +106,10 @@ export const exchangeCodeForToken = async (code) => {
       },
     })
     
+    // DEBUG: Ver estrutura completa da resposta
+    console.log("📦 Resposta completa do Nuvemshop:")
+    console.log(response.data)
+    
     // Extrair dados importantes da resposta
     const {
       access_token,    // Token de acesso para chamar API da Nuvemshop
@@ -104,13 +118,45 @@ export const exchangeCodeForToken = async (code) => {
     } = response.data
     
     console.log("✅ Token recebido do Nuvemshop")
-    console.log("   Store ID:", store_id)
-    console.log("   User ID:", user_id)
+    
+    // Se store_id não veio na resposta, buscar da API
+    let finalStoreId = store_id
+    if (!finalStoreId) {
+      console.log("🔄 Store ID não recebido, buscando da API Nuvemshop...")
+      
+      try {
+        // Primeira tentativa: endpoint de store sem store_id
+        console.log("   Tentativa 1: GET /v1/store")
+        const storeResponse = await axios.get(
+          `${NUVEMSHOP_API_BASE}/${user_id}/store`,
+          {
+            headers: {
+              "Authentication": `bearer ${access_token}`,
+              "User-Agent": "CustomGlassNorthVision (integrations@customglass.com)",
+              "Content-Type": "application/json",
+            },
+          }
+        )
+        
+        finalStoreId = storeResponse.data.id
+        console.log("✅ Store ID obtido da API")
+      } catch (apiError) {
+        console.error("❌ GET /v1/store retornou:", {
+          status: apiError.response?.status,
+          statusText: apiError.response?.statusText,
+          data: apiError.response?.data,
+        })
+        
+        // Fallback: se API falhar, tentar usar user_id como store_id
+        finalStoreId = user_id
+        console.log("⚠️ Fallback: usando user_id como store_id")
+      }
+    }
     
     return {
       access_token,
       user_id,
-      store_id,
+      store_id: finalStoreId,
     }
   } catch (error) {
     console.error("❌ Erro ao trocar code por token:", error.response?.data || error.message)
@@ -238,7 +284,7 @@ export const getAccessTokenForStore = async (storeId) => {
       throw new Error(`Loja com ID ${storeId} não encontrada`)
     }
     
-    console.log("✅ Access token recuperado do banco")
+    console.log("✅ Token recuperado do banco")
     return store.nuvemshop_access_token
   } catch (error) {
     console.error("❌ Erro ao buscar access token:", error.message)
@@ -255,34 +301,147 @@ export const validateTokenWithAPI = async (storeId, accessToken) => {
   try {
     console.log("🔄 Validando token com API Nuvemshop...")
     
-    // Fazer requuisição simples à API (buscar informações da loja)
-    const response = await axios.get(
-      `${NUVEMSHOP_API_BASE}/${storeId}/store`,
-      {
-        headers: {
-          // Authorization com Bearer token
-          "Authorization": `bearer ${accessToken}`,
-          
-          // Identificar a aplicação
-          "User-Agent": "CustomGlassNorthVision (integrations@customglass.com)",
-          
-          "Content-Type": "application/json",
-        },
+    // TESTE 1: GET /v1/{storeId}/store - Formato correto da API Nuvemshop
+    console.log("\n   📌 TESTE 1: GET /v1/{storeId}/store")
+    try {
+      const response1 = await axios.get(
+        `${NUVEMSHOP_API_BASE}/${storeId}/store`,
+        {
+          headers: {
+            "Authentication": `bearer ${accessToken}`,
+            "User-Agent": "CustomGlassNorthVision (integrations@customglass.com)",
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      
+      console.log("   ✅ Sucesso! Store data:")
+      console.log("      ID:", response1.data.id)
+      console.log("      Name:", response1.data.name)
+      console.log("      Domain:", response1.data.domain)
+      
+      return {
+        valid: true,
+        method: "/v1/store",
+        storeName: response1.data.name,
+        actualStoreId: response1.data.id,
+        data: response1.data,
       }
-    )
+    } catch (error1) {
+      console.error("   ❌ TESTE 1 falhou:", error1.response?.status, error1.response?.data?.message)
+    }
     
-    console.log("✅ Token validado com sucesso")
-    console.log("   Loja:", response.data.name)
+    // TESTE 2: GET /v1/{storeId}/store (com Authentication header)
+    console.log("\n   📌 TESTE 2: GET /v1/{storeId}/store (Authentication header)")
+    try {
+      const response2 = await axios.get(
+        `${NUVEMSHOP_API_BASE}/${storeId}/store`,
+        {
+          headers: {
+            "Authentication": `bearer ${accessToken}`,
+            "User-Agent": "CustomGlassNorthVision (integrations@customglass.com)",
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      
+      console.log("   ✅ Sucesso! Store data:")
+      console.log("      ID:", response2.data.id)
+      console.log("      Name:", response2.data.name)
+      
+      return {
+        valid: true,
+        method: `/v1/${storeId}/store`,
+        storeName: response2.data.name,
+        actualStoreId: response2.data.id,
+        data: response2.data,
+      }
+    } catch (error2) {
+      console.error("   ❌ TESTE 2 falhou:", error2.response?.status, error2.response?.data?.message)
+    }
+    
+    // TESTE 3: GET /v1/{storeId}/products (formato esperado)
+    console.log("\n   📌 TESTE 3: GET /v1/{storeId}/products (com limite)")
+    try {
+      const response3 = await axios.get(
+        `${NUVEMSHOP_API_BASE}/${storeId}/products?limit=10`,
+        {
+          headers: {
+            "Authentication": `bearer ${accessToken}`,
+            "User-Agent": "CustomGlassNorthVision (integrations@customglass.com)",
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      
+      console.log("   ✅ Sucesso! Produtos encontrados:", response3.data.length)
+      
+      return {
+        valid: true,
+        method: `/v1/${storeId}/products`,
+        productsCount: response3.data.length,
+        data: response3.data,
+      }
+    } catch (error3) {
+      console.error("   ❌ TESTE 3 falhou:", error3.response?.status, error3.response?.data?.message)
+    }
+    
+    // Se chegou aqui, nenhum teste passou
+    console.error("❌ TODOS OS TESTES FALHARAM")
+    console.error("   Possíveis causas:")
+    console.error("   1. Token inválido ou expirado")
+    console.error("   2. Store ID incorreto")
+    console.error("   3. Escopos insuficientes no app Nuvemshop")
+    console.error("   4. API rejeitando requisições da nossa aplicação") 
     
     return {
-      valid: true,
-      storeName: response.data.name,
+      valid: false,
+      error: "Token validation failed on all endpoints",
+      message: "Nenhum endpoint respondeu com sucesso",
     }
   } catch (error) {
-    console.error("❌ Erro ao validar token:", error.response?.data || error.message)
+    console.error("❌ Erro inesperado ao validar token:", error.message)
     return {
       valid: false,
       error: error.message,
     }
   }
+}
+
+// ======================================================
+// LOGIN DO LOJISTA: Autenticar com email + senha
+// ======================================================
+export const loginLojista = async (email, senha) => {
+  const result = await query(
+    "SELECT id, nome, email, password_hash FROM users WHERE email = $1 LIMIT 1",
+    [email.toLowerCase().trim()]
+  )
+
+  const user = result.rows[0]
+  if (!user) throw new Error("Credenciais inválidas")
+
+  const senhaCorreta = await bcrypt.compare(senha, user.password_hash)
+  if (!senhaCorreta) throw new Error("Credenciais inválidas")
+
+  const token = jwt.sign(
+    { userId: user.id, role: "lojista" },
+    process.env.JWT_SECRET,
+    { expiresIn: "8h", algorithm: "HS256" }
+  )
+
+  return { token, nome: user.nome, userId: user.id }
+}
+
+// ======================================================
+// CRIAR LOJISTA: Registrar novo usuário lojista
+// ======================================================
+export const criarLojista = async (nome, email, senha) => {
+  const hash = await bcrypt.hash(senha, 12)
+  const result = await query(
+    `INSERT INTO users (nome, email, password_hash)
+     VALUES ($1, $2, $3)
+     RETURNING id, nome, email`,
+    [nome.trim(), email.toLowerCase().trim(), hash]
+  )
+  return result.rows[0]
 }

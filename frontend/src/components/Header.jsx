@@ -1,13 +1,20 @@
+// ======================================================
+// Arquivo: components/Header.jsx
+// ======================================================
+// Cabecalho principal da aplicacao.
+// Mostra navegacao basica e acesso da area do lojista.
+// ======================================================
+
 import "../styles/header.css"
 import logo from "../assets/northvision-logo.webp"
 
-function Header(){
+function Header() {
 
-  return(
+  return (
 
     <header className="header">
 
-      <img src={logo} className="logo"/>
+      <img src={logo} className="logo" alt="North Vision" />
 
       <nav>
         <a href="/">Home</a>

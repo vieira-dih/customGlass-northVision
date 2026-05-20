@@ -2,7 +2,7 @@
 // Arquivo: routes/productRoutes.js
 // ======================================================
 // Rotas para gerenciar produtos da Nuvemshop
-// TODAS REQUEREM: JWT válido no header
+// Possui rotas públicas e rotas protegidas por JWT
 // ======================================================
 
 import express from "express"
@@ -10,6 +10,18 @@ import * as ProductController from "../controllers/productController.js"
 import { authenticateJWT, logRequest } from "../middleware/auth.middleware.js"
 
 const router = express.Router()
+
+// ======================================================
+// ROTAS PÚBLICAS (Sem JWT)
+// ======================================================
+
+// Rota pública 1: vitrine de produtos
+// GET /api/public/products?storeId=1
+router.get("/public/products", ProductController.listarProdutosPublicos)
+
+// Rota pública 2: gerar link para finalizar compra na loja
+// POST /api/public/checkout-link
+router.post("/public/checkout-link", ProductController.gerarCheckoutLinkPublico)
 
 // ======================================================
 // APLICAR MIDDLEWARE DE AUTENTICAÇÃO

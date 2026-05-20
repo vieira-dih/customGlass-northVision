@@ -2,15 +2,18 @@
 /* HERO */
 /* ================================ */
 .hero{
-  text-align:center;                           /* centraliza todo o conteúdo da seção */
-  padding:70px 20px 40px 20px;                 /* espaçamento interno: topo, direita, baixo, esquerda */
-  background:#f4f4f4;                          /* cor de fundo cinza claro */
+  text-align: center;                          /* centraliza o conteúdo da seção hero */
+  padding: 70px 0 40px 0;                      /* espaçamento interno: topo, sem laterais, baixo */
+  background: #f4f4f4;                         /* cor de fundo cinza claro */
 }
-/* TÍTULO */
-.hero img{
-  max-width:100%;                              /* ocupa toda largura disponível */
-  height:auto;                                 /* mantém proporção da imagem */
-  margin-bottom:25px;                          /* espaço entre título e texto */
+/* VÍDEO */
+.hero-video{
+  width: 1580px;                               /* largura base do vídeo */
+  height: 700px;                               /* altura fixa do vídeo */
+  max-width: 100%;                             /* limita à largura da tela em dispositivos menores */
+  object-fit: contain;                         /* exibe o vídeo completo sem cortar */
+  display: block;                              /* remove espaço fantasma abaixo do vídeo */
+  margin: 0 auto;                              /* centraliza o vídeo na página */
 }
 /* CATÁLOGO */
 .catalogo{

@@ -2,9 +2,8 @@ import "./home.css"
 import { useState, useEffect } from "react"
 import Header from "../../components/Header"
 import Footer from "../../components/Footer"
-import { buscarProdutos } from "../../services/api"
+import { buscarProdutosPublicos } from "../../services/api"
 import ProductCard from "../../components/ProductCard"
-import banner from "../../assets/banner-north.png"
 
 function Home() {
   const [produtos, setProdutos] = useState([])
@@ -15,42 +14,40 @@ function Home() {
     const carregarProdutos = async () => {
       try {
         setCarregando(true)
-        const dados = await buscarProdutos()
-        
+        const dados = await buscarProdutosPublicos()
+
+                // Nomes exatos dos 7 produtos que devem aparecer no catálogo
+        const PRODUTOS_PERMITIDOS = [
+          "kit radar ev 5 lentes brilho curvo - marrom",
+          "kit radar ev 5 lentes brilho curvo - branca",
+          "kit radar ev 5 lentes brilho curvo - cinza",
+          "kit radar ev 5 lentes brilho curvo - preta",
+          "kit radar ev 5 lentes brilho curvo - transparente",
+          "kit radar ev 5 lentes brilho curvo - bege",
+          "kit radar ev 5 lentes brilho curvo - transparente fosco",
+        ]
+
         // Transforma os dados da API para o formato esperado
-        const produtosFormatados = dados.map((produto) => ({
-          id: produto.id,
-          nome: produto.name,
-          imagem: produto.image?.src || produto.images?.[0]?.src || banner,
-          slug: produto.slug || produto.name.toLowerCase().replace(/\s+/g, "-")
-        }))
+        const produtosFormatados = (Array.isArray(dados) ? dados : [])
+          .filter((produto) => {
+            // Mantém apenas os produtos da lista (sem diferenciar maiúsculas/minúsculas)
+            const nome = (produto.name?.pt || produto.name || "").toLowerCase().trim()
+            return PRODUTOS_PERMITIDOS.includes(nome)
+          })
+          .map((produto) => ({
+            id: produto.id,
+            nuvemshopId: produto.id,
+            nome: produto.name?.pt || produto.name || "Sem nome",
+            imagem: produto.images?.[0]?.src || produto.image?.src || null,
+            slug: produto.handle?.pt || produto.handle || (produto.name?.pt || "").toLowerCase().replace(/\s+/g, "-"),
+          }))
         
         setProdutos(produtosFormatados)
         setErro(null)
       } catch (erro) {
         console.error("Erro ao carregar produtos:", erro)
-        setErro("Erro ao carregar produtos. Usando dados de exemplo...")
-        // Se falhar, usa os dados de exemplo (fallback)
-        setProdutos([
-          {
-            id: 1,
-            nome: "Radar EV",
-            slug: "radar-ev",
-            imagem: banner
-          },
-          {
-            id: 2,
-            nome: "Holbrook",
-            slug: "holbrook",
-            imagem: banner
-          },
-          {
-            id: 3,
-            nome: "Jawbreaker",
-            slug: "jawbreaker",
-            imagem: banner
-          }
-        ])
+        setErro(erro.message)
+        setProdutos([])
       } finally {
         setCarregando(false)
       }
@@ -63,7 +60,14 @@ function Home() {
     <div>
       <Header />
       <section className="hero">
-        <img src={banner} alt="Banner principal" />
+        <video
+          src="/banner.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="hero-video"
+        />
       </section>
       <section className="catalogo" id="modelos">
         <h2>Modelos disponíveis</h2>
@@ -78,6 +82,8 @@ function Home() {
                 nome={produto.nome}
                 imagem={produto.imagem}
                 slug={produto.slug}
+                nuvemshopId={produto.nuvemshopId}
+                varianteId={produto.varianteId}
               />
             ))}
           </div>

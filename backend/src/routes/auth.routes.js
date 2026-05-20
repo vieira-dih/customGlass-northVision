@@ -57,6 +57,30 @@ router.get(
 router.delete("/stores/:storeId", authenticateJWT, AuthController.disconnectStore)
 
 // ======================================================
+// ROTAS DE DIAGNÓSTICO (Públicas - sem autenticação)
+// ======================================================
+
+// Rota 7: Testar token e diagnosticar problemas
+// POST /auth/test-token
+// Body: { accessToken, storeId }
+// Testa se o token funciona com o store_id fornecido
+router.post("/test-token", AuthController.testTokenDiagnostic)
+
+// ======================================================
+// ROTAS DO LOJISTA
+// ======================================================
+
+// Rota 8: Login do lojista
+// POST /auth/lojista/login
+// Body: { email, senha }
+router.post("/lojista/login", AuthController.loginLojista)
+
+// Rota 9: Criar lojista (primeiro setup - protegido por adminSecret)
+// POST /auth/lojista/criar
+// Body: { nome, email, senha, adminSecret }
+router.post("/lojista/criar", AuthController.criarLojista)
+
+// ======================================================
 // Exportar router
 // ======================================================
 

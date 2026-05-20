@@ -140,6 +140,35 @@ export const getStoresByUserId = async (userId) => {
 }
 
 // ======================================================
+// LER: Buscar a loja integrada mais recente
+// ======================================================
+// Útil para fluxo público quando não há storeId explícito
+
+export const getLatestStore = async () => {
+  try {
+    const text = `
+      SELECT
+        id,
+        user_id,
+        nuvemshop_store_id,
+        nuvemshop_access_token,
+        store_name,
+        created_at,
+        updated_at
+      FROM stores
+      ORDER BY updated_at DESC, created_at DESC
+      LIMIT 1
+    `
+
+    const result = await query(text)
+    return result.rows[0] || null
+  } catch (error) {
+    console.error("❌ Erro ao buscar loja mais recente:", error)
+    throw error
+  }
+}
+
+// ======================================================
 // ATUALIZAR: Access token de uma loja
 // ======================================================
 // Pode ser necessário renovar o token periodicamente
