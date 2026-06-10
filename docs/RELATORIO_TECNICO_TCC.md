@@ -12,6 +12,8 @@
 **Frontend:** React 19 + Vite 7
 **Repositório:** Monorepo com pastas `/frontend` e `/backend`
 
+> A documentação detalhada do projeto também está disponível na pasta `docs/`, especialmente `docs/architecture.md` e `docs/flows.md`.
+
 ---
 
 ## SLIDE 2 — Arquitetura do Sistema
@@ -540,6 +542,74 @@ Backend (Express):
 
  middleware/auth.middleware.js → auth.service.js → verifyJWT()
 ```
+
+---
+
+## Script de Apresentação
+
+Este roteiro foi feito para você falar com confiança no momento da banca. Leia cada bloco em voz alta e utilize os arquivos como referência visual.
+
+### Início da apresentação
+1. Comece com o objetivo do projeto:
+   - "Este projeto se chama **CustomGlass North Vision**. É uma plataforma web para personalização de óculos esportivos integrada diretamente com lojas Nuvemshop. O cliente escolhe lentes e é redirecionado ao checkout oficial da loja."
+   - Mostre que é um monorepo com duas pastas principais: `backend/` e `frontend/`.
+   - Diga as tecnologias principais: `Node.js`, `Express`, `PostgreSQL`, `React`, `Vite`, `JWT`, `OAuth 2.0`.
+
+### Arquitetura
+1. Abra `docs/RELATORIO_TECNICO_TCC.md` no slide de arquitetura.
+2. Explique a separação de camadas:
+   - `frontend/src/` = interface do usuário.
+   - `backend/src/routes/` = definição das rotas HTTP.
+   - `backend/src/controllers/` = validação da entrada e formatação da resposta.
+   - `backend/src/services/` = lógica de negócio e integração com Nuvemshop.
+   - `backend/src/models/` = acesso ao banco de dados.
+   - `backend/src/config/database.js` = conexão PostgreSQL.
+   - `backend/src/middleware/` = segurança e logging.
+3. Mostre o diagrama simples do cliente e servidor e fale que o frontend se comunica via `fetch` e usa `JWT Bearer Token` para rotas protegidas.
+
+### Fluxo principal do sistema
+1. Explique o fluxo público (Home → Catálogo):
+   - `frontend/src/pages/Home/Home.jsx` chama `frontend/src/services/api.js`.
+   - `api.js` chama `GET /api/public/products`.
+   - `backend/src/routes/productRoutes.js` leva para `backend/src/controllers/productController.js`.
+   - O controller usa `backend/src/services/nuvemshopService.js` para buscar produtos da API Nuvemshop.
+2. Explique o fluxo OAuth do lojista:
+   - O botão em `frontend/src/components/OAuthButton.jsx` redireciona para `GET /auth/nuvemshop`.
+   - `backend/src/controllers/authController.js` inicia o OAuth e depois recebe o callback em `/auth/callback`.
+   - `backend/src/services/auth.service.js` troca `code` por `access_token`, salva token no DB via `backend/src/models/store.model.js`, gera JWT e redireciona para o frontend.
+   - `frontend/src/pages/AuthCallback/AuthCallback.jsx` recebe o token e salva em `localStorage`.
+3. Explique o fluxo de checkout personalizado:
+   - O cliente escolhe lentes em `frontend/src/pages/ProductPage/productPage.jsx`.
+   - O frontend envia `POST /api/public/checkout-link` para `backend/src/controllers/productController.js`.
+   - `backend/src/services/nuvemshopService.js` cria o pedido personalizado na Nuvemshop e retorna `checkoutUrl`.
+   - O frontend faz `window.location.href = checkoutUrl`.
+
+### Aspectos de segurança e confiabilidade
+1. Diga que o backend carrega segredos apenas de `.env` e que este arquivo não deve ser versionado.
+2. Explique que o token da Nuvemshop não vai para o frontend; ele é armazenado no banco e usado apenas pelo backend.
+3. Fale que o JWT expira em 24h e que a validação é feita no middleware.
+4. Cite a validação de senha e `ADMIN_SECRET` para criar lojistas.
+
+### Demonstração prática (se for fazer live)
+1. Mostre a home e como os produtos são exibidos.
+2. Mostre o código `Home.jsx` e como ele filtra os 7 produtos permitidos.
+3. Mostre `ProductPage/productPage.jsx` e explique a seleção de lentes, modal de contato e redirecionamento.
+4. Mostre `OAuthButton.jsx` e `authController.js` para explicar o fluxo de instalação.
+5. Se possível, abra `backend/src/services/nuvemshopService.js` e a função `criarPedidoPersonalizado()` para mostrar a integração com a API.
+
+### Possíveis perguntas da banca e onde responder no código
+- "Onde está a lógica de segurança?" → `backend/src/middleware/auth.middleware.js` e `backend/src/services/auth.service.js`
+- "Onde fica a integração com a Nuvemshop?" → `backend/src/services/nuvemshopService.js` e `backend/src/services/auth.service.js`
+- "Como o frontend consome os dados?" → `frontend/src/services/api.js`
+- "Onde está a separação entre rotas e negócios?" → `backend/src/routes/` vs `backend/src/controllers/` vs `backend/src/services/`
+- "Como o sistema lida com múltiplas lojas?" → `backend/src/models/store.model.js` e `store_id` salvo em `stores`
+
+### Encerramento
+1. Conclua com o impacto do projeto:
+   - "A solução elimina a necessidade de cadastro manual no checkout da loja, oferecendo personalização visual e encaminhamento direto para pagamento." 
+   - "Ela conecta frontend e backend com segurança e mantém os tokens sensíveis do lado servidor."
+2. Termine dizendo:
+   - "O projeto está pronto para ser testado localmente com `npm install` e `npm run dev` nas duas pastas."
 
 ---
 

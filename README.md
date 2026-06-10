@@ -1,4 +1,4 @@
-# Custom Glass North Vision — Guia Completo de Instalação
+﻿# Custom Glass North Vision — Guia Completo de Instalação
 
 Aplicação fullstack para catálogo de óculos com integração OAuth 2.0 à Nuvemshop.  
 **Backend:** Node.js + Express + PostgreSQL  
