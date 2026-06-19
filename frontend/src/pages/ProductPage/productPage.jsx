@@ -20,7 +20,7 @@ import lensTransparente from "../../assets/glasses/radar-ev/curvo/lens-transpare
 import lensVerde from "../../assets/glasses/radar-ev/curvo/lens-verde.png"
 import lensObsidian from "../../assets/glasses/radar-ev/curvo/lens-obsidian.png"
 
-import "./productPage.css"
+import "./productpage.css"
 
 // --- LISTA DE LENTES DISPONÍVEIS ---
 // Para adicionar uma nova lente, inclua um objeto { nome, img } aqui
