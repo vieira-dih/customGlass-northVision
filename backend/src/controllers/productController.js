@@ -87,6 +87,15 @@ export const listarProdutosPublicos = async (req, res) => {
   } catch (error) {
     console.error("❌ Erro ao listar produtos públicos:", error.message)
 
+    // Quando a loja ainda nao foi integrada via OAuth, retornamos lista vazia
+    // para o frontend seguir funcional sem quebrar a vitrine publica.
+    if (error.message === "Nenhuma loja integrada encontrada") {
+      return res.json({
+        mensagem: "Nenhuma loja integrada ainda. Conecte uma loja para carregar produtos.",
+        produtos: [],
+      })
+    }
+
     res.status(500).json({
       erro: "Erro ao buscar produtos públicos",
       mensagem: error.message,

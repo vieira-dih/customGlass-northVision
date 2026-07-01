@@ -1,6 +1,9 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api"
+const AUTH_BASE_URL = API_URL.replace(/\/api\/?$/, "/auth")
+
 function LojistaLogin() {
   const [modo, setModo] = useState("login") // "login" | "cadastro"
   const [form, setForm] = useState({ nome: "", email: "", senha: "", confirmarSenha: "", chave: "" })
@@ -24,7 +27,7 @@ function LojistaLogin() {
     setErro("")
     setCarregando(true)
     try {
-      const res = await fetch("http://localhost:3000/auth/lojista/login", {
+      const res = await fetch(`${AUTH_BASE_URL}/lojista/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: form.email, senha: form.senha }),
@@ -50,7 +53,7 @@ function LojistaLogin() {
     if (!form.chave.trim()) { setErro("Informe a chave de registro"); return }
     setCarregando(true)
     try {
-      const res = await fetch("http://localhost:3000/auth/lojista/criar", {
+      const res = await fetch(`${AUTH_BASE_URL}/lojista/criar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -63,7 +66,7 @@ function LojistaLogin() {
       const data = await res.json()
       if (!res.ok) { setErro(data.erro || "Erro ao criar conta"); return }
       // Após cadastrar, faz login automaticamente
-      const loginRes = await fetch("http://localhost:3000/auth/lojista/login", {
+      const loginRes = await fetch(`${AUTH_BASE_URL}/lojista/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: form.email, senha: form.senha }),

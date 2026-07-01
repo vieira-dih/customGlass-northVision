@@ -95,7 +95,7 @@ export const getProducts = async (storeId) => {
       baseURL: error.config?.baseURL,
       url: error.config?.url,
       method: error.config?.method,
-      headers: error.config?.headers,
+      // Nao logar headers para evitar vazamento de Authorization/Authentication.
     })
     throw error
   }

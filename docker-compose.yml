@@ -1,0 +1,96 @@
+# ======================================================
+# Docker Compose - Trilha A
+# ======================================================
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: customglass_db
+    environment:
+      POSTGRES_DB: custom_glass_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD nao definido}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    expose:
+      - "5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./backend/src/database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d custom_glass_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - customglass_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: customglass_backend
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: custom_glass_db
+      DB_USER: postgres
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD nao definido}
+      DB_SSL: "false"
+      NUVEMSHOP_CLIENT_ID: ${NUVEMSHOP_CLIENT_ID:?NUVEMSHOP_CLIENT_ID nao definido}
+      NUVEMSHOP_CLIENT_SECRET: ${NUVEMSHOP_CLIENT_SECRET:?NUVEMSHOP_CLIENT_SECRET nao definido}
+      NUVEMSHOP_REDIRECT_URI: ${NUVEMSHOP_REDIRECT_URI:?NUVEMSHOP_REDIRECT_URI nao definido}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET nao definido}
+      FRONTEND_URL: http://localhost
+      ADMIN_SECRET: ${ADMIN_SECRET:?ADMIN_SECRET nao definido}
+      STORE_PUBLIC_URL: ${STORE_PUBLIC_URL:?STORE_PUBLIC_URL nao definido}
+    ports:
+      - "3000:3000"
+    expose:
+      - "3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - customglass_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: customglass_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:80/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - customglass_network
+
+volumes:
+  db_data:
+    driver: local
+
+networks:
+  customglass_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

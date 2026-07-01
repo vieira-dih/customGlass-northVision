@@ -1,364 +1,291 @@
-﻿# Custom Glass North Vision — Guia Completo de Instalação
+# Custom Glass North Vision - Guia Oficial para Subida via Docker (Trilha A)
 
-Aplicação fullstack para catálogo de óculos com integração OAuth 2.0 à Nuvemshop.  
-**Backend:** Node.js + Express + PostgreSQL  
-**Frontend:** React + Vite
+Este documento foi organizado para a apresentacao da Trilha A:
+- orquestracao completa com Docker Compose
+- servicos saudaveis com healthcheck
+- persistencia de dados no banco
+- comunicacao entre containers
+- validacao por comandos reproduziveis
 
----
+## 1. Escopo da entrega
 
-## Pré-requisitos
+Stack containerizada com 3 servicos:
+- frontend: React/Vite servido por Nginx
+- backend: Node.js + Express
+- db: PostgreSQL 15
 
-Instale as ferramentas abaixo antes de começar:
+## 2. Arquivos que comprovam a Trilha A
 
-| Ferramenta | Versão mínima | Download |
-|---|---|---|
-| Node.js | 18+ | https://nodejs.org |
-| npm | 9+ | (incluso no Node.js) |
-| PostgreSQL | 14+ | https://www.postgresql.org/download |
-| Git | qualquer | https://git-scm.com |
+- docker-compose.yml
+- backend/Dockerfile
+- backend/.dockerignore
+- frontend/Dockerfile
+- frontend/nginx.conf
+- frontend/.dockerignore
 
----
+## 3. Requisitos atendidos (checklist do professor)
 
-## 1. Clonar o repositório
+### 3.1 Dockerfile otimizado
+- base Alpine
+- build em camadas eficientes
+- imagens finais menores
+- usuario nao-root
+- healthcheck
 
-```bash
-git clone https://github.com/vieira-dih/customGlass-northVision.git
-```
-```bash
-cd customGlass-northVision
-```
+### 3.2 Docker Compose completo
+- 3 servicos: frontend, backend, db
+- depends_on com condition: service_healthy
+- restart: unless-stopped
+- rede interna dedicada
 
----
+### 3.3 Persistencia e disponibilidade
+- volume nomeado do PostgreSQL
+- inicializacao do schema via mount
+- healthchecks nos servicos
 
-## 2. Configurar o banco de dados PostgreSQL
+### 3.4 Documentacao e evidencia
+- passo a passo de subida
+- comandos de validacao
+- resultado esperado por teste
+- roteiro de demonstracao
 
-### 2.1 Acessar o PostgreSQL
+## 4. Pre-requisitos
 
-**Linux/macOS:**
-```bash
-sudo -u postgres psql
-```
+- Docker Desktop instalado e rodando
+- Docker Compose habilitado (docker compose)
+- porta 80 disponivel
+- arquivo .env configurado na raiz do projeto
 
-**Windows (via CMD ou PowerShell como Administrador):**
-```Bash
-psql -U postgres
-```
+Validacao inicial:
 
-### 2.2 Criar o banco de dados
+docker --version
+docker compose version
 
-```sql
-CREATE DATABASE custom_glass_db;
-\q
-```
+## 5. Configuracao de ambiente
 
-### 2.3 Aplicar o schema (tabelas e índices)
+1. Copie o modelo de variaveis:
 
-Execute o arquivo de schema a partir da **raiz do projeto**:
+copy .env.example .env
 
-```bash
-psql -U postgres -d custom_glass_db -f backend/src/database/schema.sql
-```
+2. Preencha no .env, no minimo, os campos abaixo:
+- DB_PASSWORD
+- NUVEMSHOP_CLIENT_ID
+- NUVEMSHOP_CLIENT_SECRET
+- NUVEMSHOP_REDIRECT_URI
+- JWT_SECRET
+- ADMIN_SECRET
+- STORE_PUBLIC_URL
 
-Isso criará as tabelas:
-- `users` — usuários da aplicação
-- `stores` — lojas Nuvemshop conectadas
-- `products_cache` — cache de produtos da API Nuvemshop
+3. Se voce nao tiver conta no Nuvemshop Partners, faca isto primeiro:
+- acesse o portal de desenvolvedores da Nuvemshop / Partners
+- crie uma conta de desenvolvedor ou entre com sua conta existente
+- crie um novo app para este projeto
+- copie o Client ID e o Client Secret gerados pelo painel do app
+- cadastre a URL de redirecionamento exatamente como o projeto usa
 
----
+4. Como preencher cada variavel:
 
-## 3. Configurar as variáveis de ambiente
+### DB_PASSWORD
+- escolha uma senha forte para o PostgreSQL local
+- esta senha vai para o .env e tambem precisa bater com o docker-compose.yml
+- se quiser gerar uma senha forte, use:
 
-O backend carrega o arquivo `.env` da **raiz do projeto** (`customGlass-northVision/.env`).
-
-### 3.1 Criar o arquivo `.env`
-
-Copie o template de exemplo:
-
-```bash
-# Linux/macOS
-cp setup-guide/.env.example .env
-```
-```bash
-# Windows (PowerShell)
-Copy-Item setup-guide\.env.example .env
-```
-
-### 3.2 Gerar a chave JWT
-
-Execute o comando abaixo para gerar uma chave segura de 64 caracteres hexadecimais:
-
-```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
 
-Copie o valor gerado — ele será usado em `JWT_SECRET`.
+### NUVEMSHOP_CLIENT_ID
+- pegue no painel do app criado dentro do Nuvemshop Partners
+- normalmente aparece na tela de configuracao do app como Client ID ou App ID
 
-### 3.3 Preencher o arquivo `.env`
+### NUVEMSHOP_CLIENT_SECRET
+- pegue no mesmo painel do app
+- este valor e secreto e nao deve ser compartilhado em print, commit ou README
 
-Abra `.env` na raiz do projeto e preencha **todas** as variáveis:
+### NUVEMSHOP_REDIRECT_URI
+- use exatamente a URL cadastrada no app da Nuvemshop
+- para este projeto local, a URL esperada e:
 
-```env
-# ==========================================
-# BANCO DE DADOS
-# ==========================================
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=custom_glass_db
-DB_USER=postgres
-DB_PASSWORD=SUA_SENHA_DO_POSTGRES_AQUI
+http://localhost:3000/auth/callback
 
-# ==========================================
-# NUVEMSHOP OAuth
-# ==========================================
-# Obter em: https://www.nuvemshop.com.br/admin/apps → sua app
-NUVEMSHOP_CLIENT_ID=SEU_CLIENT_ID_AQUI
-NUVEMSHOP_CLIENT_SECRET=SEU_CLIENT_SECRET_AQUI
+- se mudar essa URL, o backend e o app da Nuvemshop precisam ficar iguais
 
-# URL de callback registrada no painel da Nuvemshop
-NUVEMSHOP_REDIRECT_URI=http://localhost:3000/auth/callback
+### STORE_PUBLIC_URL
+- informe a URL publica da loja Nuvemshop que sera integrada
+- exemplo: https://sua-loja.nuvemshop.com.br
+- este valor vem da loja da sua empresa ou da loja de testes usada na avaliacao
 
-# URL pública da loja Nuvemshop (para checkout)
-STORE_PUBLIC_URL=https://sua-loja.lojavirtualnuvem.com.br
+### JWT_SECRET
+- chave usada para assinar o login do lojista no backend
+- gere uma string longa e aleatoria
+- nao reutilize senhas comuns nem palavras do dicionario
 
-# ==========================================
-# JWT
-# ==========================================
-# Cole aqui o valor gerado no passo 3.2
-JWT_SECRET=CHAVE_GERADA_NO_PASSO_3_2_AQUI
+### ADMIN_SECRET
+- segredo usado para criar o primeiro lojista ou contas administrativas
+- gere um valor forte e unico, diferente do JWT_SECRET
+- use apenas no cadastro interno, nunca no frontend
 
-# ==========================================
-# SERVIDOR
-# ==========================================
-PORT=3000
-NODE_ENV=development
+5. Modelo pratico de preenchimento:
 
-# ==========================================
-# FRONTEND
-# ==========================================
-FRONTEND_URL=http://localhost:5173
-```
+- DB_PASSWORD=uma_senha_forte_aqui
+- NUVEMSHOP_CLIENT_ID=seu_client_id_aqui
+- NUVEMSHOP_CLIENT_SECRET=seu_client_secret_aqui
+- NUVEMSHOP_REDIRECT_URI=http://localhost:3000/auth/callback
+- STORE_PUBLIC_URL=https://sua-loja.nuvemshop.com.br
+- JWT_SECRET=uma_chave_longa_e_aleatoria
+- ADMIN_SECRET=outro_segredo_longo_e_aleatorio
 
-> **Nunca** commite o arquivo `.env` no Git. Ele já deve estar no `.gitignore`.
+6. Regra de seguranca:
+- nao versionar .env
+- nao compartilhar secrets em print, commit ou README
 
----
+7. Se voce estiver criando o app pela primeira vez, a ordem correta e:
+- criar conta no Nuvemshop Partners
+- criar o app
+- copiar Client ID e Client Secret
+- cadastrar a Redirect URI do projeto
+- preencher o .env
+- subir os containers com docker compose up -d --build
+- testar o login OAuth
 
-## 4. Obter credenciais da Nuvemshop
+## 6. Subida da stack Docker
 
-Se você ainda não tem um app criado na Nuvemshop:
+No diretorio raiz do projeto:
 
-1. Acesse **https://partners.nuvemshop.com.br**
-2. crie sua conta 
-3. Clique em **"Criar aplicativo"**
-4. Preencha nome e descrição
-5. conecte esse app com uma loja na nuvemshop (pode criar uma demo para testes)
-6. Em **"URLs de redirecionamento"**, adicione exatamente:
-   ```
-   http://localhost:3000/auth/callback
-   ```
-7. Salve e copie o **Client ID** e **Client Secret** para o `.env`
+docker compose up -d --build
 
----
+Conferir estado:
 
-## 5. Instalar dependências
+docker compose ps
 
-### Backend
+Conferir logs:
 
-```bash
-cd backend
-```
-```bash
-npm install
-```
-### Frontend
+docker compose logs --tail=100
 
-```bash
-cd frontend
-```
-```bash
-npm install
-```
----
+## 7. Enderecos de acesso
 
-## 6. Iniciar a aplicação
+- Frontend: http://localhost
+- Backend (host): http://localhost:3000
+- Banco (interno): db:5432
 
-Abra **dois terminais** separados.
+Observacao:
+- o frontend usa proxy no Nginx para /api e /auth
 
-### Terminal 1 — Backend
+## 8. Validacao obrigatoria para apresentacao
 
-```bash
-cd backend
-```
-```bash
-npm run dev
-```
-Saída esperada:
-```
-✅ Nova conexão PostgreSQL estabelecida
-🚀 Servidor rodando em http://localhost:3000
-```
+### Teste 1 - Saude dos containers
 
-### Terminal 2 — Frontend
+docker compose ps
 
-```bash
-cd frontend
-```
-```bash
-npm run dev
-```
+Esperado:
+- customglass_frontend: healthy
+- customglass_backend: healthy
+- customglass_db: healthy
 
-Saída esperada:
-```
-  VITE v7.x.x  ready in ...ms
-  ➜  Local:   http://localhost:5173/
-```
+### Teste 2 - Banco aceitando conexoes
 
----
+docker exec customglass_db pg_isready -U postgres -d custom_glass_db
 
-## 7. Verificar se está funcionando
+Esperado:
+- accepting connections
 
-### Health check do backend
+### Teste 3 - Query simples no banco
 
-Abra no navegador ou use curl:
+docker exec customglass_db psql -U postgres -d custom_glass_db -c "select 1;"
 
-```bash
-curl http://localhost:3000
-```
+Esperado:
+- retorno com valor 1
 
-Resposta esperada:
-```json
-{
-  "mensagem": "✅ API Custom Glass North Vision rodando",
-  "versao": "2.0.0",
-  "status": "OAuth 2.0 com PostgreSQL"
-}
-```
+### Teste 4 - Health do frontend
 
-### Frontend
+docker exec customglass_frontend wget -q --spider http://127.0.0.1:80/health
 
-Acesse **http://localhost:5173** no navegador.
+Esperado:
+- comando finaliza sem erro (codigo 0)
 
----
+### Teste 5 - Rota publica de produtos via proxy
 
-## 8. Fluxo de autenticação OAuth
+docker exec customglass_frontend wget -q -O- http://127.0.0.1/api/public/products
 
-1. Na interface, clique em **"Instalar aplicativo"**( para isso o dono da loja tem que estar logado na nuvemshop já)
-2. Você será redirecionado para a Nuvemshop para autorizar o app
-3. Após autorizar, a Nuvemshop redireciona para `http://localhost:3000/auth/callback`
-4. O backend troca o `code` por um `access_token` e emite um **JWT**
-5. O JWT é salvo no `localStorage` do navegador (`authToken` e `storeId`)
-6. As requisições de produtos passam o JWT no header `Authorization: Bearer <token>`
+Esperado:
+- resposta JSON valida
+- se nao houver loja integrada, pode retornar lista vazia sem caracterizar falha da stack
 
----
+## 9. Evidencias que devem ser mostradas ao professor
 
-## 9. Estrutura do projeto
+Capturar print de:
+1. docker compose ps com os 3 servicos healthy
+2. pg_isready com accepting connections
+3. select 1 no PostgreSQL
+4. teste de /health do frontend
+5. retorno de /api/public/products
 
-```
-customGlass-northVision/
-├── .env                        ← arquivo de configuração (criar no passo 3)
-├── backend/
-│   ├── package.json
-│   └── src/
-│       ├── server.js           ← ponto de entrada do Express
-│       ├── config/
-│       │   └── database.js     ← pool de conexão PostgreSQL
-│       ├── controllers/
-│       │   ├── authController.js
-│       │   └── productController.js
-│       ├── database/
-│       │   └── schema.sql      ← script SQL das tabelas
-│       ├── middleware/
-│       │   └── auth.middleware.js
-│       ├── models/
-│       │   └── store.model.js
-│       ├── routes/
-│       │   ├── auth.routes.js
-│       │   └── productRoutes.js
-│       └── services/
-│           ├── auth.service.js     ← lógica OAuth + JWT
-│           └── nuvemshopService.js ← chamadas à API Nuvemshop
-├── frontend/
-│   ├── package.json
-│   ├── vite.config.js
-│   └── src/
-│       ├── App.jsx
-│       ├── components/
-│       ├── pages/
-│       │   ├── Home/
-│       │   ├── ProductPage/
-│       │   └── AuthCallback/   ← página que recebe o redirect OAuth
-│       └── services/
-│           └── api.js          ← todas as chamadas HTTP ao backend
-└── setup-guide/
-    ├── .env.example            ← template de variáveis de ambiente
-    └── README.md
-```
+## 10. Roteiro de apresentacao (2 a 5 minutos)
+
+1. Mostrar os arquivos de Docker no repositorio
+2. Executar docker compose up -d --build
+3. Mostrar docker compose ps
+4. Rodar testes 2, 3, 4 e 5
+5. Mostrar logs curtos: docker compose logs --tail=30
+6. Finalizar com docker compose down
+
+## 11. Solucao de problemas rapida
+
+### 11.1 Frontend unhealthy
+
+docker compose up -d --build frontend
+docker exec customglass_frontend wget -q --spider http://127.0.0.1:80/health
+
+### 11.2 Backend indisponivel
+
+docker compose logs backend --tail=100
+docker compose restart backend
+
+### 11.3 Banco com falha de inicializacao
+
+docker compose logs db --tail=100
+
+Se precisar resetar dados locais para teste limpo:
+
+docker compose down -v
+docker compose up -d --build
+
+### 11.4 Comandos de pausa no PowerShell
+
+Evite timeout /t 5 > nul no PowerShell.
+Use:
+
+Start-Sleep -Seconds 5
+
+## 12. Encerramento da execucao
+
+Parar mantendo volume:
+
+docker compose down
+
+Parar removendo volumes:
+
+docker compose down -v
+
+## 13. Seguranca e credenciais
+
+Regras obrigatorias:
+1. Nunca commitar .env
+2. Nunca colocar segredo real em docker-compose.yml
+3. Rotacionar credenciais se houver qualquer exposicao
+
+Segredos que devem ser fortes e unicos:
+- DB_PASSWORD
+- NUVEMSHOP_CLIENT_SECRET
+- JWT_SECRET
+- ADMIN_SECRET
+
+Gerador de segredo (Node.js):
+
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+
+Depois de trocar secrets no .env:
+
+docker compose down
+docker compose up -d --build
 
 ---
 
-## 10. Rotas disponíveis da API
-
-| Método | Rota | Autenticação | Descrição |
-|---|---|---|---|
-| GET | `/` | Não | Health check |
-| GET | `/auth/nuvemshop` | Não | Inicia fluxo OAuth |
-| GET | `/auth/callback` | Não | Recebe código OAuth da Nuvemshop |
-| GET | `/auth/verify` | JWT | Valida token e retorna dados da loja |
-| GET | `/auth/stores` | JWT | Lista lojas conectadas do usuário |
-| GET | `/auth/validate-with-nuvemshop` | JWT | Testa token na API da Nuvemshop |
-| DELETE | `/auth/stores/:storeId` | JWT | Desconecta uma loja |
-| POST | `/auth/test-token` | Não | Diagnóstico de token |
-| GET | `/api/products/:storeId` | JWT | Busca produtos da loja |
-
----
-
-## 11. Solução de problemas
-
-### Erro: `ECONNREFUSED` ao conectar ao banco
-
-- Verifique se o serviço PostgreSQL está rodando:
- ```bash
-  # Linux
-  sudo systemctl status postgresql
-```
-```bash
-  # Windows PowerShell como Admin
-  Get-Service postgresql*
-  ```
-- Confirme que `DB_HOST`, `DB_PORT`, `DB_USER` e `DB_PASSWORD` no `.env` estão corretos.
-
-### Erro: `invalid_client` no OAuth
-
-- Verifique se `NUVEMSHOP_CLIENT_ID` e `NUVEMSHOP_CLIENT_SECRET` estão corretos.
-- Confirme que `NUVEMSHOP_REDIRECT_URI` no `.env` é **idêntico** ao cadastrado no painel da Nuvemshop.
-
-### Erro: `JsonWebTokenError` / token inválido
-
-- Confirme que `JWT_SECRET` no `.env` não está vazio.
-- Se trocou o valor de `JWT_SECRET`, os tokens antigos (salvos no navegador) deixam de funcionar — limpe o `localStorage` e faça o fluxo OAuth novamente.
-
-### Frontend não consegue falar com o backend
-
-- Confirme que o backend está rodando na porta `3000`.
-- Verifique se `FRONTEND_URL=http://localhost:5173` está no `.env` (necessário para o CORS).
-- A URL da API está hardcoded em `frontend/src/services/api.js` como `http://localhost:3000/api` — não mude a porta do backend sem atualizar esse arquivo.
-
-### Schema já existe / erro de índice duplicado
-
-O schema usa `CREATE TABLE IF NOT EXISTS` e `CREATE INDEX IF NOT EXISTS`, portanto é seguro executá-lo novamente sem apagar dados.
-
----
-
-## 12. Checklist rápido
-
-Antes de reportar qualquer problema, confirme:
-
-- [ ] Node.js 18+ instalado (`node --version`)
-- [ ] PostgreSQL rodando e acessível
-- [ ] Banco `custom_glass_db` criado
-- [ ] Schema aplicado (`schema.sql`)
-- [ ] Arquivo `.env` na **raiz** do projeto (não dentro de `backend/`)
-- [ ] Todas as variáveis do `.env` preenchidas (sem valores `_AQUI`)
-- [ ] `npm install` executado em `backend/` e em `frontend/`
-- [ ] Backend rodando na porta `3000`
-- [ ] Frontend rodando na porta `5173`
-- [ ] URL de callback registrada na Nuvemshop exatamente como `http://localhost:3000/auth/callback`

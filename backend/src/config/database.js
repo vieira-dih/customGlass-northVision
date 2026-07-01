@@ -34,6 +34,12 @@ const pool = new Pool({
   
   // Senha do usuário
   password: process.env.DB_PASSWORD || "postgres",
+
+  // SSL opcional para provedores externos (ex.: Supabase/Render)
+  ssl:
+    process.env.DB_SSL === "true"
+      ? { rejectUnauthorized: false }
+      : false,
   
   // Máximo de conexões simultâneas no pool
   max: 20,

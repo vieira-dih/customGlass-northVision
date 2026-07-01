@@ -2,6 +2,9 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import OAuthButton from "../../components/OAuthButton"
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api"
+const AUTH_BASE_URL = API_URL.replace(/\/api\/?$/, "/auth")
+
 function LojistaAdmin() {
   const navigate = useNavigate()
   const [nome, setNome] = useState("")
@@ -16,7 +19,7 @@ function LojistaAdmin() {
     }
 
     // Verificar se token ainda é válido
-    fetch("http://localhost:3000/auth/verify", {
+    fetch(`${AUTH_BASE_URL}/verify`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((r) => {

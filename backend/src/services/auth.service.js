@@ -106,9 +106,8 @@ export const exchangeCodeForToken = async (code) => {
       },
     })
     
-    // DEBUG: Ver estrutura completa da resposta
-    console.log("📦 Resposta completa do Nuvemshop:")
-    console.log(response.data)
+    // Nunca logar payload completo para nao expor access_token em logs.
+    console.log("📦 Resposta do Nuvemshop recebida (campos sensiveis ocultados)")
     
     // Extrair dados importantes da resposta
     const {
@@ -159,7 +158,13 @@ export const exchangeCodeForToken = async (code) => {
       store_id: finalStoreId,
     }
   } catch (error) {
-    console.error("❌ Erro ao trocar code por token:", error.response?.data || error.message)
+    const status = error.response?.status
+    const responseData = error.response?.data
+    console.error("❌ Erro ao trocar code por token:", {
+      status,
+      message: error.message,
+      providerError: responseData?.error || responseData?.message,
+    })
     throw error
   }
 }

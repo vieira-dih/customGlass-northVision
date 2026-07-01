@@ -9,6 +9,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api"
+const AUTH_BASE_URL = API_URL.replace(/\/api\/?$/, "/auth")
+
 function AuthCallback() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -61,7 +64,7 @@ function AuthCallback() {
           setMensagem('Processando autorização da Nuvemshop...')
           
           // Chamar backend para processar o code
-          const response = await fetch(`http://localhost:3000/auth/callback?code=${code}&store_id=${store_id}`)
+          const response = await fetch(`${AUTH_BASE_URL}/callback?code=${code}&store_id=${store_id}`)
           
           if (!response.ok) {
             throw new Error(`Erro ao processar callback: ${response.status}`)

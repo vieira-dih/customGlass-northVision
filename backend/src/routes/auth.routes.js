@@ -64,7 +64,7 @@ router.delete("/stores/:storeId", authenticateJWT, AuthController.disconnectStor
 // POST /auth/test-token
 // Body: { accessToken, storeId }
 // Testa se o token funciona com o store_id fornecido
-router.post("/test-token", AuthController.testTokenDiagnostic)
+router.post("/test-token", authenticateJWT, AuthController.testTokenDiagnostic)
 
 // ======================================================
 // ROTAS DO LOJISTA
